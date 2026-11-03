@@ -315,8 +315,9 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.1',
-  MAX_FILE_MB: 10
+  FORM_VERSION: '2.2',
+  MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
+  CHUNK_MB: 4
 };
 
 /* SCHEMA-START：欄位定義（變項代碼 = Google 試算表欄名） */
@@ -481,6 +482,7 @@ function dictRows() {
   const WRAP = new Map();
   SCHEMA.forEach((sec, si) => sec.fields.forEach(f => FIELDS.set(f.id, { f, sec, si })));
   const fileStore = {};
+  let chunked = false; // 後端支援分段上傳時為 true，檔案就不限大小
   const tried = new Set();
   const visited = new Set();
   const codeCache = new Map();
@@ -597,7 +599,7 @@ function dictRows() {
   function renderFiles(f, w, desc) {
     const input = h('input', { type: 'file', id: f.id, class: 'sr-file', multiple: true, accept: f.accept, 'aria-describedby': desc });
     input.addEventListener('change', () => { addFiles(f, input.files); input.value = ''; });
-    w.append(h('div', { class: 'file-row' }, input, h('label', { for: f.id, class: 'btn-file', text: '選擇檔案' }), h('span', { class: 'file-hint', text: '可以拍照，或把檔案拖到這裡。附件不會存進草稿。' })), h('ul', { class: 'file-list', id: `fl-${f.id}` }));
+    w.append(h('div', { class: 'file-row' }, input, h('label', { for: f.id, class: 'btn-file', text: '選擇檔案（可多選）' }), h('span', { class: 'file-hint', text: '可以一次選多個檔案、直接拍照，或把檔案拖到這裡。附件不會存進草稿。' })), h('ul', { class: 'file-list', id: `fl-${f.id}` }));
     w.addEventListener('dragover', e => { e.preventDefault(); w.classList.add('drag'); });
     w.addEventListener('dragleave', () => w.classList.remove('drag'));
     w.addEventListener('drop', e => { e.preventDefault(); w.classList.remove('drag'); if (e.dataTransfer) addFiles(f, e.dataTransfer.files); });
@@ -608,7 +610,8 @@ function dictRows() {
     const rejected = [];
     Array.from(files || []).forEach(file => {
       if (/\.dcm$/i.test(file.name) || mimeOf(file) === 'application/dicom') { rejected.push(`${file.name}（DICOM 檔請匯出成 JPG 或 MP4）`); return; }
-      if (file.size > max) { rejected.push(`${file.name}（超過 ${CONFIG.MAX_FILE_MB} MB，請改用雲端連結）`); return; }
+      if (!file.size) { rejected.push(`${file.name}（檔案是空的）`); return; }
+      if (!chunked && file.size > max) { rejected.push(`${file.name}（超過 ${CONFIG.MAX_FILE_MB} MB，請改用雲端連結）`); return; }
       if (!typeOk(file, f.accept)) { rejected.push(`${file.name}（格式不支援）`); return; }
       if (!arr.some(x => x.name === file.name && x.size === file.size)) arr.push(file);
     });
@@ -888,6 +891,8 @@ function dictRows() {
       ACCESS_DENIED: '邀請碼不正確，請對照邀請訊息再輸入一次。',
       NOT_CONFIGURED: '收案系統還沒啟用，請聯絡主持人。',
       FILE_TOO_LARGE: `檔案超過 ${CONFIG.MAX_FILE_MB} MB。`,
+      UPLOAD_EXPIRED: '上傳中斷太久，請按「重試失敗的附件」。',
+      UNKNOWN_ACTION: '收案系統正在更新，請稍後按「重試失敗的附件」。',
       TYPE_NOT_ALLOWED: '只接受圖片、PDF 或影片檔。',
       CASE_NOT_FOUND: '找不到這個病例編號，請聯絡主持人。',
       BAD_CASE_ID: '病例編號格式錯誤，請聯絡主持人。',
@@ -995,13 +1000,43 @@ function dictRows() {
     const todo = lastJobs.filter(j => !j.ok);
     for (let i = 0; i < todo.length; i++) {
       const j = todo[i];
-      if (onProgress) onProgress(`正在上傳附件 ${i + 1}／${todo.length}：${j.file.name}`);
+      const label = `正在上傳附件 ${i + 1}／${todo.length}：${j.file.name}`;
+      if (onProgress) onProgress(label);
       try {
-        const data = await toBase64(j.file);
-        const r = await api({ action: 'upload', accessCode: lastCode, caseId: lastCase, category: j.category, fileName: j.file.name, mimeType: mimeOf(j.file), data });
+        const r = await uploadOne(j, pct => { if (onProgress) onProgress(`${label}（${pct}%，請先不要關閉頁面）`); });
         j.ok = !!(r && r.ok);
         j.err = j.ok ? '' : errText(r && r.error);
       } catch (e) { j.ok = false; j.err = errText('NETWORK'); }
+    }
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function retry(fn, tries = 3) {
+    for (let k = 1; ; k++) {
+      try { return await fn(); }
+      catch (e) { if (k >= tries) throw e; await sleep(2000 * k); }
+    }
+  }
+  /* 4 MB 以下一次傳完；更大的檔案分段傳，後端再轉存到雲端硬碟，不限大小 */
+  async function uploadOne(j, onPct) {
+    const file = j.file, chunk = CONFIG.CHUNK_MB * 1048576;
+    const meta = { accessCode: lastCode, caseId: lastCase, category: j.category, fileName: file.name, mimeType: mimeOf(file) };
+    const whole = async () => api(Object.assign({ action: 'upload', data: await toBase64(file) }, meta));
+    if (file.size <= chunk || !chunked) return whole();
+    let restarted = false;
+    for (;;) {
+      const st = await retry(() => api(Object.assign({ action: 'upload_start', size: file.size }, meta)));
+      if (st && st.error === 'UNKNOWN_ACTION' && file.size <= CONFIG.MAX_FILE_MB * 1048576) return whole();
+      if (!st || !st.ok) return st;
+      let offset = 0;
+      for (;;) {
+        const data = await toBase64(file.slice(offset, Math.min(offset + chunk, file.size)));
+        const r = await retry(() => api({ action: 'upload_chunk', accessCode: lastCode, token: st.token, offset, data }));
+        if (r && r.error === 'BUSY') { await sleep(3000); continue; }
+        if (r && r.error === 'UPLOAD_EXPIRED' && !restarted) { restarted = true; break; }
+        if (!r || !r.ok || r.done) return r;
+        offset = r.next;
+        onPct(Math.floor(offset / file.size * 100));
+      }
     }
   }
 
@@ -1115,6 +1150,8 @@ function dictRows() {
     byId('dict-csv').addEventListener('click', downloadDict);
 
     if (!CONFIG.ENDPOINT) banner('demo', '預覽模式：還沒設定收案後端，送出時只會顯示將送出的資料，不會儲存。');
+    else fetch(CONFIG.ENDPOINT, { redirect: 'follow' }).then(r => r.json()).then(r => { chunked = !!(r && r.chunked); }).catch(() => {});
+    window.addEventListener('beforeunload', e => { if (busy) { e.preventDefault(); e.returnValue = ''; } });
     let start = 0;
     const c = store.get(CONTRIB_KEY);
     if (c) { applyValues(c); if (!stepErrors(0, collect()).length) start = 1; }
