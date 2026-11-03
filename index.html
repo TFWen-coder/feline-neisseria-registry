@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>貓 Neisseria 心包炎病例登錄</title>
+<meta name="description" content="台灣貓 Neisseria 屬細菌性心包炎多中心回溯性病例系列：線上病例登錄">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='11' width='26' height='10' rx='5' fill='%235A3EA6' transform='rotate(-24 16 16)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&family=Source+Serif+4:ital,wght@1,600&display=swap">
+<style>
+/* 版面：左側步驟列＋右側一次一步的表單；手機改成上方六段進度條，底部固定「上一步／下一步」 */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --slide:#F5F6FA;--surface:#FFFFFF;--ink:#221B35;--ink-2:#5E5873;
+  --line:#DAD7E6;--line-strong:#B6B0CC;
+  --violet:#5A3EA6;--violet-tint:#EEEAF8;--on-violet:#FFFFFF;
+  --safranin:#C42F63;--safranin-tint:#FBE8EF;
+  --ok:#2E7A57;--warn:#8A5200;--warn-tint:#FFF1D6;
+  --cell:#E8E1F5;--cell-edge:#CDBFEA;--nuc:#6B4DB3;--nuc-2:#9A84D6;--vac:#FFFFFF;--bact:#2E1F63;
+  --font-body:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --font-display:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
+  --gutter:24px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --slide:#14111D;--surface:#1C1828;--ink:#EDEAF6;--ink-2:#ABA5C0;
+    --line:#332D45;--line-strong:#4D4566;
+    --violet:#A994F2;--violet-tint:#2A2342;--on-violet:#15111F;
+    --safranin:#F2709B;--safranin-tint:#3A1C29;
+    --ok:#5DC593;--warn:#F0B65A;--warn-tint:#33260F;
+    --cell:#2A2341;--cell-edge:#41376A;--nuc:#9D86EA;--nuc-2:#C9BBF5;--vac:#15111F;--bact:#EDE6FF;
+    color-scheme:dark;
+  }
+}
+@media (max-width:600px){:root{--gutter:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--slide);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.7}
+a{color:var(--violet);text-underline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+.skip{position:absolute;left:-9999px;top:12px}
+.skip:focus{left:16px;z-index:20;background:var(--surface);padding:8px 12px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+
+/* 提示列 */
+.banner{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:14.5px;line-height:1.6;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap}
+.banner.demo{background:var(--warn-tint);color:var(--warn)}
+.banner.draft{background:var(--violet-tint)}
+.banner-text{flex:1 1 260px}
+.banner-btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+
+/* 開頭 */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 48px;padding-block:44px 4px;align-items:start}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4.4vw,44px);line-height:1.25;margin:0 0 14px;letter-spacing:.02em;text-wrap:balance}
+.genus{font-family:"Source Serif 4",var(--font-display);font-style:italic;font-weight:600;letter-spacing:0}
+.lede{max-width:35em;font-size:16.5px;margin:0}
+.hero-fig{margin:0;width:clamp(88px,15vw,156px)}
+.hero-fig svg{display:block;width:100%;height:auto}
+.facts{grid-column:1/-1;display:grid;grid-template-columns:1.5fr 1.1fr .8fr 1.2fr;margin:24px 0 0;border-top:1px solid var(--line)}
+.facts>div{padding:14px 22px 0 0;min-width:0}
+.facts dt{font-size:13px;color:var(--ink-2);margin:0 0 2px}
+.facts dd{margin:0;font-size:14.5px;line-height:1.65}
+
+/* 主體 */
+.app{display:grid;grid-template-columns:196px minmax(0,1fr);gap:48px;align-items:start;padding-block:36px 56px;scroll-margin-top:8px}
+.app:focus{outline:none}
+.steps{position:sticky;top:24px}
+.steps ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.step-btn{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink-2);font:inherit;font-size:15px;line-height:1.4;text-align:left;cursor:pointer}
+.step-btn:hover{background:var(--violet-tint);color:var(--ink)}
+.step-btn[aria-current="step"]{background:var(--violet-tint);color:var(--ink);font-weight:500}
+.step-btn .n{font-variant-numeric:tabular-nums;width:1em;text-align:right}
+.rod{flex:none;width:16px;height:7px;border-radius:4px;border:1.5px solid var(--line-strong);transform:rotate(-24deg);transition:background-color .3s,border-color .3s}
+.rod[data-state="done"]{background:var(--violet);border-color:var(--violet)}
+.rod[data-state="error"]{border-color:var(--safranin);background:var(--safranin-tint)}
+.steps-meta{font-size:13px;color:var(--ink-2);margin:16px 10px 0;font-variant-numeric:tabular-nums}
+.panel{min-width:0}
+.step-head{margin-bottom:26px}
+.step-count{font-size:13.5px;color:var(--ink-2);margin:0 0 4px;font-variant-numeric:tabular-nums}
+.step-head h2{font-family:var(--font-display);font-size:26px;line-height:1.35;margin:0;font-weight:700}
+.step-desc{margin:8px 0 0;color:var(--ink-2);font-size:15px;max-width:38em}
+.whoami{margin:12px 0 0;font-size:14.5px;color:var(--ink-2)}
+.linkbtn{font:inherit;color:var(--violet);background:none;border:0;padding:0 2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* 欄位 */
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:24px 20px}
+.field{grid-column:span var(--span,6);min-width:0}
+.lab,legend{display:block;font-weight:500;font-size:15px;margin:0 0 7px;padding:0;line-height:1.5}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.req{color:var(--safranin);margin-left:3px}
+.help{font-size:13px;color:var(--ink-2);margin:6px 0 0;line-height:1.6}
+.err{font-size:13px;color:var(--safranin);margin:6px 0 0;line-height:1.5}
+.err:empty{display:none}
+.input{width:100%;font:inherit;font-size:16px;line-height:1.4;padding:10px 12px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
+.input::placeholder{color:var(--ink-2);opacity:.7}
+.input:focus-visible{outline:2px solid var(--violet);outline-offset:0;border-color:var(--violet)}
+.input.upper{text-transform:uppercase;letter-spacing:.06em}
+.field.invalid .input{border-color:var(--safranin)}
+select.input{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);background-position:calc(100% - 19px) 52%,calc(100% - 14px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+textarea.input{resize:vertical;line-height:1.65}
+.unit-wrap{display:flex}
+.unit-wrap .input{border-radius:8px 0 0 8px;min-width:0}
+.unit{display:flex;align-items:center;padding:0 10px;border:1px solid var(--line-strong);border-left:0;border-radius:0 8px 8px 0;background:var(--violet-tint);color:var(--ink-2);font-size:13.5px;white-space:nowrap}
+.code-status{font-size:13px;margin:6px 0 0;color:var(--ink-2)}
+.code-status:empty{display:none}
+.code-status.ok{color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;display:inline-flex;min-width:0;max-width:100%}
+.chip input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font-size:15px;line-height:1.45}
+.chip:hover span{border-color:var(--violet)}
+.chip input:checked+span{background:var(--violet);border-color:var(--violet);color:var(--on-violet)}
+.chip input[type=checkbox]:checked+span::before{content:"✓";font-size:12.5px}
+.chip input:focus-visible+span{outline:2px solid var(--violet);outline-offset:2px}
+.field.invalid .chip span{border-color:var(--safranin)}
+.other{margin-top:10px}
+.consent{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;line-height:1.6}
+.consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--violet);flex:none}
+.field.invalid .consent{border-color:var(--safranin)}
+.file-row{position:relative;display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:14px;border:1px dashed var(--line-strong);border-radius:10px;background:var(--surface)}
+.field.drag .file-row{border-color:var(--violet);background:var(--violet-tint)}
+.field.invalid .file-row{border-color:var(--safranin)}
+.sr-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.btn-file{display:inline-block;padding:7px 14px;border-radius:8px;border:1px solid var(--violet);color:var(--violet);font-size:15px;font-weight:500;cursor:pointer;line-height:1.4}
+.sr-file:focus-visible+.btn-file{outline:2px solid var(--violet);outline-offset:2px}
+.file-hint{font-size:13.5px;color:var(--ink-2)}
+.file-list{list-style:none;margin:6px 0 0;padding:0}
+.file-list:empty{display:none}
+.file-list li{display:flex;align-items:center;gap:10px;padding:4px 2px;font-size:14.5px;border-bottom:1px solid var(--line)}
+.fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsize{color:var(--ink-2);font-variant-numeric:tabular-nums;font-size:13px}
+.row-del{flex:none;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--ink-2);font-size:20px;line-height:1;cursor:pointer}
+.row-del:hover{background:var(--safranin-tint);color:var(--safranin)}
+
+/* 送出前檢查 */
+.review{margin-top:36px;padding:20px 22px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.review h3{font-size:16px;margin:0 0 6px}
+.review p{margin:0}
+.review-list{margin:6px 0 12px;padding-left:1.2em;font-size:14.5px;line-height:1.8}
+.review-list:last-child{margin-bottom:0}
+.review-list.miss a{color:var(--safranin)}
+.review-ok{color:var(--ok);margin-bottom:10px!important}
+.submit-msg{margin-top:14px;font-size:14.5px}
+.submit-msg.bad{color:var(--safranin)}
+.preview{max-height:320px;overflow:auto;font-size:12.5px;line-height:1.5;background:var(--slide);border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0 0;white-space:pre-wrap;word-break:break-all}
+
+/* 上一步／下一步 */
+.pager{position:sticky;bottom:0;z-index:4;display:flex;align-items:center;gap:12px;margin-top:36px;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px));background:var(--slide);border-top:1px solid var(--line)}
+.pager-status{flex:1;min-width:0;font-size:13px;color:var(--ink-2);line-height:1.5}
+.btn-primary{font:inherit;font-weight:500;font-size:16px;padding:11px 26px;border-radius:10px;border:0;background:var(--violet);color:var(--on-violet);cursor:pointer;white-space:nowrap}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary[disabled]{opacity:.55;cursor:progress}
+.btn-secondary{font:inherit;font-size:15px;padding:10px 18px;border-radius:10px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn-secondary:hover{border-color:var(--violet)}
+
+/* 完成 */
+.done-title{font-family:var(--font-display);font-size:26px;margin:0}
+.case-id{font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--violet);margin:6px 0 14px;line-height:1.2}
+.done h3{font-size:16px;margin:28px 0 8px}
+.done p{max-width:38em}
+.up-list{list-style:none;margin:0;padding:0;font-size:14.5px}
+.up-list li{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+.up-list .mark{flex:none;font-size:13px;font-weight:500;color:var(--ok)}
+.up-list .bad .mark,.up-list .why{color:var(--safranin)}
+.up-list .why{font-size:13px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+
+/* 頁尾與資料字典 */
+.foot{padding-block:24px 48px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-2);display:flex;gap:12px 24px;flex-wrap:wrap;justify-content:space-between}
+.foot p{margin:0;max-width:40em}
+dialog{width:min(1040px,calc(100vw - 32px));max-height:calc(100vh - 48px);border:1px solid var(--line);border-radius:14px;padding:0;background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(20,16,32,.45)}
+.dict-head{position:sticky;top:0;z-index:1;background:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dict-head h2{font-family:var(--font-display);font-size:20px;margin:0}
+.dict-body{padding:0 20px 20px;overflow-x:auto}
+.dict-body table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.55}
+.dict-body th,.dict-body td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+.dict-body thead th{color:var(--ink-2);font-weight:500;white-space:nowrap}
+.dict-sec th{background:var(--violet-tint);color:var(--ink);font-weight:500}
+.dict-body code{font-size:12.5px;white-space:nowrap}
+
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr);gap:0;padding-top:24px}
+  .steps{position:static;margin-bottom:22px}
+  .steps ol{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+  .step-btn{justify-content:center;padding:14px 0;border-radius:6px}
+  .step-btn:hover,.step-btn[aria-current="step"]{background:transparent}
+  .step-btn .n,.step-btn .t,.steps-meta{display:none}
+  .rod{width:100%;height:8px;transform:none}
+  .step-btn[aria-current="step"] .rod{height:10px;border-width:2px;border-color:var(--violet)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  .hero{grid-template-columns:1fr;padding-top:28px;gap:10px}
+  .hero-fig{order:-1;width:72px}
+  .lede{font-size:16px}
+  .facts{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}
+  .field{grid-column:span 2}
+  .field.t-number{grid-column:span 1}
+  .step-head h2{font-size:23px}
+  .review{padding:16px}
+  .btn-primary{padding:11px 20px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#app">跳到表單</a>
+<div id="banners" class="wrap"></div>
+
+<header class="hero wrap">
+  <div>
+    <h1>貓 <i class="genus">Neisseria</i> 心包炎<br>病例登錄</h1>
+    <p class="lede">我們正在整理台灣心包液培養出 <i>Neisseria</i> 屬的貓病例，做成多中心回溯性病例系列。每例分 6 步，約 10 分鐘。你的聯絡資料只要填一次；血液檢查和藥敏不用打數字，上傳報告就好。草稿會自動存在這台電腦，可以分次填完。</p>
+  </div>
+  <figure class="hero-fig" aria-hidden="true">
+    <svg viewBox="0 0 240 240">
+      <circle cx="120" cy="122" r="90" fill="var(--cell)" stroke="var(--cell-edge)" stroke-width="1.5"/>
+      <g fill="var(--nuc)">
+        <ellipse cx="88" cy="108" rx="30" ry="23" transform="rotate(-24 88 108)"/>
+        <ellipse cx="140" cy="92" rx="27" ry="21" transform="rotate(14 140 92)"/>
+        <ellipse cx="148" cy="146" rx="25" ry="20" transform="rotate(-12 148 146)"/>
+      </g>
+      <g fill="none" stroke="var(--nuc)" stroke-width="7" stroke-linecap="round">
+        <path d="M108 100 Q118 94 124 92"/>
+        <path d="M152 112 Q156 122 152 128"/>
+      </g>
+      <g fill="var(--nuc-2)" opacity=".55">
+        <ellipse cx="82" cy="104" rx="9" ry="6"/>
+        <ellipse cx="97" cy="117" rx="7" ry="5"/>
+        <ellipse cx="136" cy="88" rx="8" ry="5"/>
+        <ellipse cx="152" cy="150" rx="7" ry="5"/>
+      </g>
+      <g fill="var(--vac)" opacity=".75">
+        <circle cx="70" cy="152" r="5"/>
+        <circle cx="96" cy="170" r="4"/>
+        <circle cx="181" cy="118" r="4.5"/>
+        <circle cx="118" cy="192" r="3.5"/>
+        <circle cx="178" cy="172" r="3"/>
+      </g>
+      <g fill="var(--bact)">
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(84 178) rotate(28)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(101 188) rotate(-14)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(188 144) rotate(62)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(183 158) rotate(70)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(166 188) rotate(12)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(64 136) rotate(-40)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(117 58) rotate(18)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(131 62) rotate(18)"/>
+      </g>
+      <g fill="var(--bact)" opacity=".85">
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(214 38) rotate(24)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(227 44) rotate(24)"/>
+        <rect x="-7" y="-2.6" width="14" height="5.2" rx="2.6" transform="translate(24 214) rotate(-32)"/>
+      </g>
+    </svg>
+  </figure>
+  <dl class="facts">
+    <div><dt>收案條件</dt><dd>貓，心包液或心包組織培養出 <i>Neisseria</i> 屬，首次採樣在 2015 年以後</dd></div>
+    <div><dt>不收集</dt><dd>飼主姓名、電話、地址、病歷號與晶片號</dd></div>
+    <div><dt>收案截止</dt><dd id="fact-deadline"></dd></div>
+    <div><dt>主持人</dt><dd id="fact-pi"></dd></div>
+  </dl>
+</header>
+
+<main class="wrap app" id="app" tabindex="-1">
+  <nav class="steps" aria-label="填寫步驟">
+    <ol id="rail-list"></ol>
+    <p class="steps-meta" id="rail-meta"></p>
+  </nav>
+  <div class="panel">
+    <form id="crf" novalidate autocomplete="off">
+      <div id="steps-host"></div>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <div class="pager">
+        <button type="button" class="btn-secondary" id="btn-prev">上一步</button>
+        <span class="pager-status" id="pager-status" aria-live="polite"></span>
+        <button type="button" class="btn-primary" id="btn-next">下一步</button>
+      </div>
+    </form>
+    <section class="done" id="done" aria-live="polite" hidden></section>
+  </div>
+</main>
+
+<footer class="foot wrap">
+  <p>本頁只收集去識別化的病例資料，僅用於本研究；登錄者資料與病例資料分開儲存。沒有邀請碼的話，請私訊主持人索取。</p>
+  <p><button type="button" class="linkbtn" id="btn-dict">資料字典</button>　表單版本 <span id="form-version"></span></p>
+</footer>
+
+<dialog id="dict" aria-labelledby="dict-title">
+  <div class="dict-head">
+    <h2 id="dict-title">資料字典</h2>
+    <div class="actions" style="margin:0">
+      <button type="button" class="btn-secondary" id="dict-csv">下載 CSV</button>
+      <button type="button" class="btn-secondary" id="dict-close">關閉</button>
+    </div>
+  </div>
+  <div class="dict-body" id="dict-body"></div>
+</dialog>
+
+<script>
+/* ============================================================
+   設定：部署時只需要改這一區
+   ============================================================ */
+const CONFIG = {
+  // Google Apps Script 部署後的網址（結尾是 /exec）
+  ENDPOINT: 'https://script.google.com/macros/s/AKfycbx7hXAY6yBCLeiuT2cBBqk_azO2XpuFUkoL4oyb7XpHOddm20qHUUNHgvH5Ig_UK2OE/exec',
+  PI: 'Tsung Fei Wen（TF Wen）',
+  HOSPITAL: 'Mercy Animal Hospital（高雄）',
+  DEADLINE: '2027-02-28',
+  FORM_VERSION: '2.0',
+  MAX_FILE_MB: 10
+};
+
+/* SCHEMA-START：欄位定義（變項代碼 = Google 試算表欄名） */
+const CITIES = ['基隆市', '臺北市', '新北市', '桃園市', '新竹市', '新竹縣', '苗栗縣', '臺中市', '彰化縣', '南投縣', '雲林縣', '嘉義市', '嘉義縣', '臺南市', '高雄市', '屏東縣', '宜蘭縣', '花蓮縣', '臺東縣', '澎湖縣', '金門縣', '連江縣'];
+const YNU = ['有', '無', '不明'];
+const ABX = ['Amoxicillin-clavulanate', 'Ampicillin 或 ampicillin-sulbactam', 'Cefazolin', 'Cefovecin', '第三代頭孢菌素', 'Enrofloxacin', 'Marbofloxacin', 'Pradofloxacin', 'Doxycycline', 'TMP-SMX', 'Metronidazole', 'Clindamycin', 'Gentamicin 或 amikacin', '其他'];
+const ABX_USED = { f: 't_main', has: '抗生素' };
+const CYTO_DONE = { f: 'f_cyto', in: ['化膿性滲出液', '其他發炎性滲出液', '其他'] };
+const DIED = { any: [{ f: 'o_last_status', eq: '死亡（含安樂死）' }, { f: 'o_discharge', in: ['院內死亡', '院內安樂死'] }] };
+const stripTags = s => String(s).replace(/<[^>]+>/g, '');
+
+const SCHEMA = [
+  { id: 'contributor', group: 'contributor', short: '你的資料', title: '你的資料', desc: '只要填一次，之後登錄新病例會自動帶入。這一頁只有主持人看得到，和病例資料分開存放。', fields: [
+    { id: 'access_code', type: 'text', label: '邀請碼', required: true, meta: true, keep: true, check: true, upper: true, help: '邀請訊息裡附的邀請碼。沒有的話請私訊主持人索取。' },
+    { id: 'c_name', type: 'text', label: '姓名', required: true, keep: true, autocomplete: 'name' },
+    { id: 'c_hospital', type: 'text', label: '醫院', required: true, keep: true, autocomplete: 'organization' },
+    { id: 'c_city', type: 'select', label: '醫院所在縣市', required: true, keep: true, options: CITIES },
+    { id: 'c_email', type: 'email', label: 'Email', required: true, keep: true, autocomplete: 'email', help: '主持人詢問缺漏資料時用。' },
+    { id: 'c_phone', type: 'text', label: '電話或 LINE ID', keep: true },
+    { id: 'c_author', type: 'radio', label: '有興趣參與論文審閱、列名共同作者嗎？', keep: true, options: ['有興趣', '沒有', '想先了解'], help: '共同作者須提供病例、完成登錄，並參與審閱定稿。' },
+    { id: 'c_consent', type: 'consent', label: '院長或負責獸醫師已同意本院以去識別化方式提供病例資料', required: true, keep: true }
+  ] },
+  { id: 'signalment', group: 'case', short: '基本資料', title: '基本資料與病史', who: true, fields: [
+    { id: 's_dx_date', type: 'date', label: '診斷日（首次採心包液）', required: true, min: '2015-01-01', span: 2 },
+    { id: 's_age_y', type: 'number', label: '年齡', unit: '歲', required: true, min: 0, max: 30, int: true, validate: V => (V.s_age_y === '0' && !V.s_age_m) ? '未滿 1 歲請填月數' : '' },
+    { id: 's_age_m', type: 'number', label: '＋月數', unit: '月', min: 0, max: 11, int: true },
+    { id: 's_sex', type: 'radio', label: '性別', required: true, options: ['公', '母'], span: 2 },
+    { id: 's_neuter', type: 'radio', label: '結紮', required: true, options: ['已結紮', '未結紮', '不明'], span: 4 },
+    { id: 's_breed', type: 'select', label: '品種', required: true, other: true, span: 3, options: ['米克斯（短毛）', '米克斯（長毛）', '英國短毛貓', '美國短毛貓', '蘇格蘭摺耳貓', '波斯貓', '異國短毛貓', '布偶貓', '緬因貓', '暹羅貓', '其他'] },
+    { id: 's_weight', type: 'number', label: '體重', unit: 'kg', min: 0.2, max: 15, step: 0.01, span: 3 },
+    { id: 'h_lifestyle', type: 'radio', label: '生活型態', options: ['完全室內', '可外出', '流浪或新收容', '不明'] },
+    { id: 'h_cohabit', type: 'checks', label: '同住動物', options: ['無', '其他貓', '狗', '其他動物', '不明'], exclusive: ['無', '不明'] },
+    { id: 'h_bite', type: 'radio', label: '近 1 個月打架、咬傷或穿刺傷', options: YNU },
+    { id: 'h_bite_note', type: 'text', label: '傷口部位，距診斷幾天', span: 6, showIf: { f: 'h_bite', eq: '有' } },
+    { id: 'h_dental', type: 'radio', label: '近 3 個月洗牙、拔牙或全身麻醉', options: YNU },
+    { id: 'h_dental_note', type: 'text', label: '做了什麼，距診斷幾天', span: 6, showIf: { f: 'h_dental', eq: '有' } },
+    { id: 'h_oral', type: 'radio', label: '牙周狀態（依病歷記載）', options: ['無明顯牙周病', '輕度', '中度', '重度', '慢性齦口炎', '未記錄'] },
+    { id: 'h_retro', type: 'checks', label: 'FIV／FeLV', options: ['FIV 陽性', 'FeLV 陽性', '兩者皆陰性', '未檢測'], exclusive: ['兩者皆陰性', '未檢測'] },
+    { id: 'h_comorbid', type: 'checks', label: '既往或合併疾病', options: ['無', '心肌病或其他心臟病', '慢性腎病', '糖尿病', '甲狀腺機能亢進', '腫瘤', '慢性上呼吸道疾病', 'FIP（病史或疑似）', '其他'], exclusive: ['無'], other: true },
+    { id: 'h_immuno', type: 'radio', label: '近 1 個月用過類固醇、ciclosporin 或化療藥', options: YNU },
+    { id: 'h_immuno_note', type: 'text', label: '藥名與劑量', span: 6, showIf: { f: 'h_immuno', eq: '有' } },
+    { id: 'h_preabx', type: 'radio', label: '採心包液之前已經用了抗生素', options: YNU },
+    { id: 'h_preabx_note', type: 'text', label: '藥名，用了幾天', span: 6, showIf: { f: 'h_preabx', eq: '有' } },
+    { id: 'el_other_site', type: 'radio', label: '這隻貓這次的病也在其他醫院看過嗎？', options: ['沒有', '有', '不確定'], help: '用來避免同一隻貓被重複登錄。' },
+    { id: 'el_other_site_note', type: 'text', label: '其他醫院的名稱或縣市', span: 6, showIf: { f: 'el_other_site', in: ['有', '不確定'] } },
+    { id: 'c_attending', group: 'contributor', type: 'text', label: '主治醫師', span: 6, help: '不是你本人主治的病例才需要填。' }
+  ] },
+  { id: 'presentation', group: 'case', short: '就診表現', title: '就診表現與血液檢查', desc: '血液檢查不用打數字：直接上傳報告，數值由主持人統一擷取。', fields: [
+    { id: 'p_complaint', type: 'checks', label: '主訴', options: ['食慾不振或廢絕', '精神沉鬱', '呼吸急促或困難', '嘔吐', '虛脫或倒地', '體重減輕', '其他'], other: true },
+    { id: 'p_duration', type: 'number', label: '到院前症狀持續', unit: '天', min: 0, max: 365 },
+    { id: 'p_temp', type: 'number', label: '體溫', unit: '°C', min: 30, max: 43, step: 0.1 },
+    { id: 'p_hr', type: 'number', label: '心跳', unit: 'bpm', min: 20, max: 350, int: true },
+    { id: 'p_exam', type: 'checks', label: '理學檢查', options: ['心音模糊', '心雜音', '心律不整', '股脈弱', '黏膜蒼白', '頸靜脈怒張', '腹部膨大或腹水', '肺音減弱', '休克', '無特殊', '其他'], exclusive: ['無特殊'], other: true },
+    { id: 'u_blood', type: 'files', label: '血液檢查報告（CBC、生化、血片判讀）', accept: 'image/*,application/pdf', help: '治療前、最接近診斷日的報告；後續追蹤的報告也歡迎一起上傳。' },
+    { id: 'l_bloodcx', type: 'radio', label: '血液培養', options: ['未做', '陰性', '陽性'] },
+    { id: 'l_bloodcx_org', type: 'text', label: '血液培養長出的菌', span: 6, showIf: { f: 'l_bloodcx', eq: '陽性' } }
+  ] },
+  { id: 'imaging', group: 'case', short: '影像與心包液', title: '影像與心包液', fields: [
+    { id: 'i_tamponade', type: 'radio', label: '心包填塞（右心房或右心室舒張期塌陷）', options: ['有', '無', '不確定'] },
+    { id: 'i_echo_find', type: 'checks', label: '心臟超音波其他發現', options: ['心包增厚', '心包內纖維素或分隔', '左心室肥厚', '左心房擴大', '疑似心肌炎', '疑似心內膜炎（瓣膜贅生物）', '無其他異常', '其他'], exclusive: ['無其他異常'], other: true },
+    { id: 'i_thorax', type: 'checks', label: '胸腔 X 光或 CT', options: ['心影擴大或球形心', '肺浸潤', '肺結節或腫塊', '縱膈異常', '無異常', '沒有拍'], exclusive: ['無異常', '沒有拍'] },
+    { id: 'i_pleural', type: 'radio', label: '胸水', options: YNU },
+    { id: 'i_pleural_type', type: 'radio', label: '胸水性質', options: ['化膿性（膿胸）', '非化膿性', '沒有採樣'], showIf: { f: 'i_pleural', eq: '有' } },
+    { id: 'i_pleural_cx', type: 'radio', label: '胸水培養', options: ['未做', '陰性', '陽性'], showIf: { f: 'i_pleural', eq: '有' } },
+    { id: 'i_pleural_org', type: 'text', label: '胸水培養長出的菌', span: 6, showIf: { f: 'i_pleural_cx', eq: '陽性' } },
+    { id: 'i_ascites', type: 'radio', label: '腹水', options: YNU },
+    { id: 'i_abd', type: 'text', label: '腹腔其他感染灶', span: 6, placeholder: '例：肝膿瘍、腹膜炎；沒有就留空' },
+    { id: 'u_imaging', type: 'files', label: '心臟超音波、X 光或 CT 截圖', accept: 'image/*,video/*', help: '匯出成 JPG 或 MP4，並遮蓋畫面上的飼主資料。DICOM 檔頭常有飼主資料，請不要直接上傳。' },
+    { id: 'f_appear', type: 'checks', label: '心包液外觀', options: ['膿樣或混濁', '血樣', '漿液血樣', '含絮狀物', '惡臭', '其他'], other: true },
+    { id: 'f_cyto', type: 'radio', label: '心包液細胞學', options: ['化膿性滲出液', '其他發炎性滲出液', '其他', '未做'], other: true, help: '化膿性滲出液：以變性嗜中性球為主。' },
+    { id: 'f_icb', type: 'radio', label: '細胞內細菌', options: ['有', '無', '未評估'], showIf: CYTO_DONE },
+    { id: 'f_morph', type: 'checks', label: '細菌形態', options: ['球菌', '雙球菌', '球桿菌', '桿菌', '混合', '未見細菌'], exclusive: ['未見細菌'], showIf: CYTO_DONE },
+    { id: 'u_fluid', type: 'files', label: '心包液分析報告或細胞學照片', accept: 'image/*,application/pdf' }
+  ] },
+  { id: 'micro', group: 'case', short: '培養結果', title: '培養結果', desc: '先上傳培養報告，再照報告填。藥敏結果由主持人從報告擷取，不用打。', fields: [
+    { id: 'u_culture', type: 'files', label: '培養與藥敏報告', required: true, accept: 'image/*,application/pdf', help: '上傳前請遮蓋飼主姓名、電話與病歷號。' },
+    { id: 'm_specimen', type: 'checks', label: '培養檢體', required: true, options: ['心包液', '心包組織', '引流液', '剖檢檢體'] },
+    { id: 'm_species', type: 'select', label: '<i>Neisseria</i> 菌種', required: true, span: 3, other: true, otherValue: '其他（照報告填）', options: ['N. animaloris', 'N. zoodegmatis', 'N. canis', 'N. weaveri', 'Neisseria spp.（未鑑定到種）', 'CDC EF-4（舊稱）', '其他（照報告填）'] },
+    { id: 'm_lab', type: 'text', label: '檢驗單位', required: true, span: 3 },
+    { id: 'm_mixed', type: 'radio', label: '菌相', required: true, options: ['只有 Neisseria', '混合菌'], span: 3 },
+    { id: 'm_ast', type: 'radio', label: '藥敏試驗', options: ['有做', '未做'], span: 3 },
+    { id: 'm_co_orgs', type: 'text', label: '同時長出的其他菌', span: 6, placeholder: '照報告原文，可以填多個', showIf: { f: 'm_mixed', eq: '混合菌' } },
+    { id: 'm_id_method', type: 'select', label: '菌種鑑定方法', span: 3, other: true, options: ['報告沒寫或不知道', '傳統生化', 'VITEK 2', 'MALDI-TOF', '16S rRNA 定序', '其他'] },
+    { id: 'm_isolate', type: 'radio', label: '菌株還保存在檢驗單位嗎？', span: 3, options: ['是', '否', '不知道'] },
+    { id: 'm_other_cx', type: 'text', label: '其他部位的培養結果', span: 6, placeholder: '例：腹水陰性；肺部 FNA 長出 N. animaloris' }
+  ] },
+  { id: 'outcome', group: 'case', short: '治療與結局', title: '治療與結局', fields: [
+    { id: 't_main', type: 'checks', label: '主要治療', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔引流管', '手術（心包切除或開窗）', '抗生素', '未治療或診斷後即安樂死'], exclusive: ['未治療或診斷後即安樂死'] },
+    { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
+    { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
+    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: { f: 't_main', has: '手術（心包切除或開窗）' } },
+    { id: 't_abx_drugs', type: 'checks', label: '用過的抗生素', options: ABX, other: true, showIf: ABX_USED },
+    { id: 't_abx_change', type: 'radio', label: '有依藥敏結果換藥嗎？', options: ['有換藥', '沒有換藥', '沒有藥敏結果'], showIf: ABX_USED },
+    { id: 't_abx_total', type: 'number', label: '抗生素總療程', unit: '天', min: 0, max: 365, int: true, showIf: ABX_USED },
+    { id: 't_hosp_days', type: 'number', label: '住院天數', unit: '天', min: 0, max: 365, int: true },
+    { id: 't_dental', type: 'radio', label: '治療期間或之後有做牙科處置嗎？', options: ['沒有', '洗牙', '拔牙', '不明'] },
+    { id: 'o_discharge', type: 'radio', label: '住院結果', required: true, options: ['存活出院', '院內死亡', '院內安樂死', '未住院'] },
+    { id: 'o_last_date', type: 'date', label: '最後追蹤日', required: true, min: '2015-01-01', span: 2, help: '死亡病例填死亡日。', validate: V => (V.s_dx_date && V.o_last_date && V.o_last_date < V.s_dx_date) ? '不能早於診斷日' : '' },
+    { id: 'o_last_status', type: 'radio', label: '最後狀態', required: true, options: ['存活', '死亡（含安樂死）', '失聯'], span: 4, validate: V => (['院內死亡', '院內安樂死'].includes(V.o_discharge) && V.o_last_status && V.o_last_status !== '死亡（含安樂死）') ? '住院期間死亡的病例，最後狀態應為「死亡（含安樂死）」' : '' },
+    { id: 'o_death_related', type: 'radio', label: '死亡和這次的病有關嗎？', options: ['有關', '無關', '不明'], showIf: DIED },
+    { id: 'o_death_cause', type: 'text', label: '死亡或安樂死的原因', span: 6, showIf: DIED },
+    { id: 'o_recur', type: 'radio', label: '心包積液復發', options: YNU, span: 3 },
+    { id: 'o_constrict', type: 'radio', label: '縮窄性心包炎', options: YNU, span: 3 },
+    { id: 'o_recur_day', type: 'number', label: '復發距診斷日', unit: '天', min: 0, max: 5000, int: true, showIf: { f: 'o_recur', eq: '有' } },
+    { id: 'o_necropsy', type: 'radio', label: '剖檢或病理', options: ['有', '無'] },
+    { id: 'u_path', type: 'files', label: '病理報告', accept: 'image/*,application/pdf', showIf: { f: 'o_necropsy', eq: '有' } },
+    { id: 'u_link', type: 'text', label: '雲端連結（檔案太大時用）', span: 6, placeholder: 'Google 雲端硬碟或 Dropbox 分享連結' },
+    { id: 'n_notes', type: 'textarea', label: '其他想補充的', rows: 3, placeholder: '例：臨床經過的特殊之處、你對感染來源的看法' }
+  ] }
+];
+
+/* 資料字典：網頁的「資料字典」與計畫書的變項清單都由這裡產生 */
+function dictRows() {
+  const T = { text: '文字', email: 'Email', number: '數字', date: '日期', select: '單選', radio: '單選', checks: '複選', textarea: '長文字', consent: '勾選確認', files: '附件數量' };
+  const ACC = { 'image/*': '圖片', 'application/pdf': 'PDF', 'video/*': '影片' };
+  const condText = c => c.any ? c.any.map(condText).join('，或 ') : `${c.f}${'eq' in c ? ` 為「${c.eq}」` : c.in ? ` 為「${c.in.join('」或「')}」` : c.has ? ` 含「${c.has}」` : ' 有填'}`;
+  const opts = f => f.options ? f.options.join('／')
+    : f.type === 'number' ? [f.unit, `${f.min}–${f.max}`].filter(Boolean).join('，')
+    : f.type === 'date' ? 'YYYY-MM-DD'
+    : f.type === 'files' ? f.accept.split(',').map(a => ACC[a] || a).join('、')
+    : f.type === 'consent' ? '是' : '';
+  const rows = [];
+  SCHEMA.forEach((s, i) => {
+    const sec = `${i + 1}. ${s.title}${s.group === 'contributor' ? '（另存於登錄者資料）' : ''}`;
+    s.fields.forEach(f => {
+      const cond = f.showIf ? condText(f.showIf) : '';
+      const label = stripTags(f.label) + ((f.group === 'contributor' && s.group !== 'contributor') ? '（另存於登錄者資料）' : '');
+      const id = f.meta ? `${f.id}（不儲存）` : f.type === 'files' ? `${f.id}_n` : f.id;
+      rows.push({ sec, id, label, type: T[f.type] || f.type, options: opts(f), required: f.required ? '是' : '', cond });
+      if (f.other) rows.push({ sec, id: `${f.id}_other`, label: `${stripTags(f.label)}（其他說明）`, type: '文字', options: '', required: '', cond: `${f.id} 選「${f.otherValue || '其他'}」` });
+    });
+  });
+  [['case_id', '病例編號（系統產生）'], ['submitted_at', '送出時間'], ['review_status', '審核狀態：待審核／納入／排除／待補件'], ['review_note', '審核備註'], ['duplicate_of', '重複病例的主編號'], ['site_city', '醫院所在縣市（複製自登錄者資料）'], ['form_version', '表單版本']]
+    .forEach(([id, label]) => rows.push({ sec: '系統欄位', id, label, type: '系統', options: '', required: '', cond: '' }));
+  return rows;
+}
+/* SCHEMA-END */
+
+/* ============================================================
+   表單引擎：以下不需要修改
+   ============================================================ */
+(() => {
+  'use strict';
+  const TODAY = (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); })();
+  const DRAFT_KEY = 'np-crf-draft-v2';
+  const CONTRIB_KEY = 'np-crf-contributor-v2';
+  const LAST = SCHEMA.length - 1;
+  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_abx_drugs', 't_abx_total', 't_hosp_days'];
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const byId = id => document.getElementById(id);
+  const FIELDS = new Map();
+  const WRAP = new Map();
+  SCHEMA.forEach((sec, si) => sec.fields.forEach(f => FIELDS.set(f.id, { f, sec, si })));
+  const fileStore = {};
+  const tried = new Set();
+  const visited = new Set();
+  const codeCache = new Map();
+  let cur = 0, busy = false, whoText = null;
+  let lastJobs = [], lastCase = '', lastCode = '';
+
+  const store = {
+    get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+  };
+
+  function h(tag, props, ...kids) {
+    const n = document.createElement(tag);
+    Object.entries(props || {}).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === false) return;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k === 'html') n.innerHTML = v;
+      else if (typeof v === 'function' && k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : v);
+    });
+    kids.flat().forEach(c => { if (c !== null && c !== undefined && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    return n;
+  }
+
+  const otherOf = f => f.otherValue || '其他';
+  const hasOther = (f, v) => Array.isArray(v) ? v.includes(otherOf(f)) : v === otherOf(f);
+  const isEmpty = v => v === '' || v === false || v === null || v === undefined || (Array.isArray(v) && v.length === 0);
+  const spanOf = f => f.span || (f.type === 'number' ? 2 : ['text', 'email', 'select', 'date'].includes(f.type) ? 3 : 6);
+  const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const pad = n => String(n).padStart(2, '0');
+  const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const size = b => b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`;
+  const labelText = f => stripTags(f.label);
+  const where = id => { const e = FIELDS.get(id); return `${e.sec.short}：${labelText(e.f)}`; };
+
+  /* ---------- 畫出表單 ---------- */
+  function render() {
+    const host = byId('steps-host'), rail = byId('rail-list');
+    SCHEMA.forEach((sec, i) => {
+      const head = h('header', { class: 'step-head' },
+        h('p', { class: 'step-count', text: `第 ${i + 1} 步，共 ${SCHEMA.length} 步` }),
+        h('h2', { id: `h-${sec.id}`, tabindex: '-1', text: sec.title }));
+      if (sec.desc) head.append(h('p', { class: 'step-desc', html: sec.desc }));
+      if (sec.who) head.append(h('p', { class: 'whoami', id: 'whoami', hidden: true }));
+      const grid = h('div', { class: 'grid' });
+      sec.fields.forEach(f => grid.append(renderField(f)));
+      const step = h('section', { class: 'step', id: `step-${sec.id}`, 'aria-labelledby': `h-${sec.id}`, hidden: true }, head, grid);
+      if (i === LAST) step.append(h('section', { class: 'review', 'aria-labelledby': 'h-review' }, h('h3', { id: 'h-review', text: '送出前檢查' }), h('div', { id: 'review-body' }), h('div', { id: 'submit-msg', class: 'submit-msg', role: 'status', hidden: true })));
+      host.append(step);
+      rail.append(h('li', {}, h('button', { type: 'button', class: 'step-btn', 'data-i': String(i) },
+        h('span', { class: 'rod', 'data-state': 'todo', 'aria-hidden': 'true' }),
+        h('span', { class: 'n', 'aria-hidden': 'true', text: String(i + 1) }),
+        h('span', { class: 't', 'aria-hidden': 'true', text: sec.short }))));
+    });
+    rail.addEventListener('click', e => { const b = e.target.closest('.step-btn'); if (b && !busy) goTo(Number(b.dataset.i)); });
+  }
+
+  function labelInto(el, f) {
+    el.innerHTML = f.label;
+    if (f.required) el.append(h('span', { class: 'req', 'aria-hidden': 'true', text: '*' }), h('span', { class: 'sr', text: '（必填）' }));
+    return el;
+  }
+
+  function renderField(f) {
+    const w = h('div', { class: `field t-${f.type}`, 'data-id': f.id, style: `--span:${spanOf(f)}` });
+    WRAP.set(f.id, w);
+    const helpId = f.help ? `help-${f.id}` : null;
+    const errId = `err-${f.id}`;
+    const desc = [helpId, errId].filter(Boolean).join(' ');
+    if (['text', 'email', 'date', 'number'].includes(f.type)) {
+      const isNum = f.type === 'number';
+      const inp = h('input', {
+        id: f.id, name: f.id, class: `input${f.upper ? ' upper' : ''}`, type: isNum ? 'text' : f.type,
+        inputmode: isNum ? ((f.step || 1) < 1 ? 'decimal' : 'numeric') : (f.type === 'email' ? 'email' : null),
+        autocomplete: f.autocomplete || 'off', placeholder: f.placeholder || null, spellcheck: 'false',
+        autocapitalize: f.upper ? 'characters' : null,
+        min: f.type === 'date' ? (f.min || null) : null, max: f.type === 'date' ? TODAY : null,
+        'aria-describedby': desc
+      });
+      w.append(labelInto(h('label', { class: 'lab', for: f.id }), f));
+      w.append(f.unit ? h('div', { class: 'unit-wrap' }, inp, h('span', { class: 'unit', text: f.unit })) : inp);
+      if (f.check) w.append(h('p', { class: 'code-status', id: 'code-status', 'aria-live': 'polite' }));
+    } else if (f.type === 'textarea') {
+      w.append(labelInto(h('label', { class: 'lab', for: f.id }), f), h('textarea', { id: f.id, name: f.id, class: 'input', rows: f.rows || 3, placeholder: f.placeholder || null, 'aria-describedby': desc }));
+    } else if (f.type === 'select') {
+      w.append(labelInto(h('label', { class: 'lab', for: f.id }), f), h('select', { id: f.id, name: f.id, class: 'input', 'aria-describedby': desc }, h('option', { value: '', text: '請選擇' }), f.options.map(o => h('option', { value: o, text: o }))));
+    } else if (f.type === 'radio' || f.type === 'checks') {
+      const box = h('div', { class: 'chips' }, f.options.map(o => h('label', { class: 'chip' }, h('input', { type: f.type === 'radio' ? 'radio' : 'checkbox', name: f.id, value: o }), h('span', { text: o }))));
+      w.append(h('fieldset', { 'aria-describedby': desc }, labelInto(h('legend'), f), box));
+    } else if (f.type === 'consent') {
+      w.append(h('label', { class: 'consent' }, h('input', { type: 'checkbox', id: f.id, name: f.id, 'aria-describedby': desc }), labelInto(h('span'), f)));
+    } else if (f.type === 'files') {
+      w.append(labelInto(h('label', { class: 'lab', for: f.id }), f));
+      renderFiles(f, w, desc);
+    }
+    if (f.other) w.append(h('div', { class: 'other', hidden: true }, h('input', { id: `${f.id}_other`, class: 'input', type: 'text', placeholder: `請說明「${otherOf(f)}」`, 'aria-label': `${labelText(f)}：其他說明` })));
+    if (f.help) w.append(h('p', { class: 'help', id: helpId, html: f.help }));
+    w.append(h('p', { class: 'err', id: errId }));
+    return w;
+  }
+
+  /* ---------- 附件 ---------- */
+  function mimeOf(file) {
+    if (file.type) return file.type;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    return ({ heic: 'image/heic', heif: 'image/heif', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf', mp4: 'video/mp4', mov: 'video/quicktime', m4v: 'video/x-m4v' })[ext] || 'application/octet-stream';
+  }
+  function typeOk(file, accept) {
+    const t = mimeOf(file);
+    return accept.split(',').some(a => { a = a.trim(); return a.endsWith('/*') ? t.startsWith(a.slice(0, -1)) : t === a; });
+  }
+  function renderFiles(f, w, desc) {
+    const input = h('input', { type: 'file', id: f.id, class: 'sr-file', multiple: true, accept: f.accept, 'aria-describedby': desc });
+    input.addEventListener('change', () => { addFiles(f, input.files); input.value = ''; });
+    w.append(h('div', { class: 'file-row' }, input, h('label', { for: f.id, class: 'btn-file', text: '選擇檔案' }), h('span', { class: 'file-hint', text: '可以拍照，或把檔案拖到這裡。附件不會存進草稿。' })), h('ul', { class: 'file-list', id: `fl-${f.id}` }));
+    w.addEventListener('dragover', e => { e.preventDefault(); w.classList.add('drag'); });
+    w.addEventListener('dragleave', () => w.classList.remove('drag'));
+    w.addEventListener('drop', e => { e.preventDefault(); w.classList.remove('drag'); if (e.dataTransfer) addFiles(f, e.dataTransfer.files); });
+  }
+  function addFiles(f, files) {
+    const arr = fileStore[f.id] = fileStore[f.id] || [];
+    const max = CONFIG.MAX_FILE_MB * 1048576;
+    const rejected = [];
+    Array.from(files || []).forEach(file => {
+      if (/\.dcm$/i.test(file.name) || mimeOf(file) === 'application/dicom') { rejected.push(`${file.name}（DICOM 檔請匯出成 JPG 或 MP4）`); return; }
+      if (file.size > max) { rejected.push(`${file.name}（超過 ${CONFIG.MAX_FILE_MB} MB，請改用雲端連結）`); return; }
+      if (!typeOk(file, f.accept)) { rejected.push(`${file.name}（格式不支援）`); return; }
+      if (!arr.some(x => x.name === file.name && x.size === file.size)) arr.push(file);
+    });
+    drawFiles(f);
+    showErr(f, rejected.length ? `沒有加入：${rejected.join('、')}` : '');
+    refresh();
+    schedule();
+  }
+  function drawFiles(f) {
+    const ul = byId(`fl-${f.id}`);
+    ul.innerHTML = '';
+    (fileStore[f.id] || []).forEach((file, i) => ul.append(h('li', {}, h('span', { class: 'fname', text: file.name }), h('span', { class: 'fsize', text: size(file.size) }), h('button', { type: 'button', class: 'row-del', 'aria-label': `移除 ${file.name}`, title: '移除', text: '×', onclick: () => { fileStore[f.id].splice(i, 1); drawFiles(f); refresh(); schedule(); } }))));
+  }
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result).split(',')[1] || '');
+      fr.onerror = () => reject(fr.error);
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* ---------- 讀值與寫值 ---------- */
+  function getValue(f) {
+    const w = WRAP.get(f.id);
+    switch (f.type) {
+      case 'radio': { const c = $(`input[name="${f.id}"]:checked`, w); return c ? c.value : ''; }
+      case 'checks': return $$(`input[name="${f.id}"]:checked`, w).map(i => i.value);
+      case 'consent': return byId(f.id).checked;
+      case 'files': return (fileStore[f.id] || []).slice();
+      default: { const i = byId(f.id); const v = i ? i.value.trim() : ''; return f.upper ? v.toUpperCase() : v; }
+    }
+  }
+  function collect() {
+    const V = {};
+    FIELDS.forEach(({ f }) => {
+      V[f.id] = getValue(f);
+      if (f.other) V[`${f.id}_other`] = byId(`${f.id}_other`).value.trim();
+    });
+    return V;
+  }
+  function setValue(f, v) {
+    const w = WRAP.get(f.id);
+    switch (f.type) {
+      case 'radio': $$(`input[name="${f.id}"]`, w).forEach(i => { i.checked = i.value === v; }); break;
+      case 'checks': $$(`input[name="${f.id}"]`, w).forEach(i => { i.checked = Array.isArray(v) && v.includes(i.value); }); break;
+      case 'consent': byId(f.id).checked = !!v; break;
+      case 'files': fileStore[f.id] = []; drawFiles(f); break;
+      default: { const i = byId(f.id); if (i) i.value = v == null ? '' : v; }
+    }
+  }
+  function applyValues(V) {
+    Object.entries(V || {}).forEach(([k, v]) => {
+      if (FIELDS.has(k)) { const { f } = FIELDS.get(k); if (f.type !== 'files') setValue(f, v); }
+      else if (k.endsWith('_other')) { const i = byId(k); if (i) i.value = v || ''; }
+    });
+  }
+  const contributorValues = V => {
+    const o = {};
+    FIELDS.forEach(({ f }) => { if (f.keep) o[f.id] = V[f.id]; });
+    return o;
+  };
+
+  /* ---------- 顯示條件與驗證 ---------- */
+  function deps(c) { return c.any ? c.any.flatMap(deps) : [c.f]; }
+  function test(c, V) {
+    if (c.any) return c.any.some(x => test(x, V));
+    const v = V[c.f];
+    if ('eq' in c) return v === c.eq;
+    if ('in' in c) return c.in.includes(v);
+    if ('has' in c) return Array.isArray(v) && v.includes(c.has);
+    return !isEmpty(v);
+  }
+  function visible(id, V, depth = 0) {
+    const e = FIELDS.get(id);
+    if (!e || !e.f.showIf || depth > 8) return true;
+    const c = e.f.showIf;
+    if (!test(c, V)) return false;
+    const ds = deps(c);
+    return c.any ? ds.some(d => visible(d, V, depth + 1)) : ds.every(d => visible(d, V, depth + 1));
+  }
+  function errorFor(f, V) {
+    const v = V[f.id];
+    if (isEmpty(v)) {
+      if (!f.required) return '';
+      if (f.type === 'files') return '請上傳至少一個檔案';
+      if (f.type === 'consent') return '請確認這一項';
+      if (['radio', 'checks', 'select'].includes(f.type)) return '請選擇';
+      return '請填寫這一欄';
+    }
+    if (f.check && codeCache.get(v) === 'bad') return errText('ACCESS_DENIED');
+    if (f.type === 'number') {
+      if (!/^-?\d+(\.\d+)?$/.test(v)) return '請填數字';
+      const n = Number(v);
+      if (f.int && !Number.isInteger(n)) return '請填整數';
+      if (f.min !== undefined && n < f.min) return `不能小於 ${f.min}`;
+      if (f.max !== undefined && n > f.max) return `不能大於 ${f.max}`;
+    }
+    if (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Email 格式不正確';
+    if (f.type === 'date') {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return '日期格式不正確';
+      if (v > TODAY) return '日期不能晚於今天';
+      if (f.min && v < f.min) return `日期不能早於 ${f.min}`;
+    }
+    if (f.other && f.required && hasOther(f, v) && !V[`${f.id}_other`]) return `請說明「${otherOf(f)}」的內容`;
+    return f.validate ? f.validate(V) : '';
+  }
+  function showErr(f, msg) {
+    const w = WRAP.get(f.id);
+    w.classList.toggle('invalid', !!msg);
+    byId(`err-${f.id}`).textContent = msg || '';
+    const inp = byId(f.id);
+    if (inp && /^(INPUT|SELECT|TEXTAREA)$/.test(inp.tagName)) inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  }
+  function stepErrors(si, V) {
+    const out = [];
+    SCHEMA[si].fields.forEach(f => {
+      if (!visible(f.id, V)) return;
+      const msg = errorFor(f, V);
+      if (msg) out.push({ f, si, msg });
+    });
+    return out;
+  }
+  function showStepErrors(si, V) { SCHEMA[si].fields.forEach(f => showErr(f, visible(f.id, V) ? errorFor(f, V) : '')); }
+
+  /* ---------- 換步驟 ---------- */
+  function goTo(i, opts = {}) {
+    i = Math.max(0, Math.min(LAST, i));
+    cur = i;
+    visited.add(i);
+    SCHEMA.forEach((sec, k) => { byId(`step-${sec.id}`).hidden = k !== i; });
+    byId('crf').hidden = false;
+    byId('done').hidden = true;
+    refresh();
+    if (opts.scroll !== false) byId('app').scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' });
+    if (opts.focus !== false) { const hd = byId(`h-${SCHEMA[i].id}`); if (hd) hd.focus({ preventScroll: true }); }
+    schedule();
+  }
+  async function next() {
+    if (busy) return;
+    if (cur === LAST) { submit(); return; }
+    tried.add(cur);
+    let V = collect();
+    if (cur === 0 && CONFIG.ENDPOINT && V.access_code && codeCache.get(V.access_code) !== 'ok') {
+      setBusy(true, '正在確認邀請碼…');
+      await verifyCode(V.access_code);
+      setBusy(false);
+      V = collect();
+    }
+    const errs = stepErrors(cur, V);
+    showStepErrors(cur, V);
+    refresh();
+    if (errs.length) { focusField(errs[0].f.id); return; }
+    goTo(cur + 1);
+  }
+  function focusField(id) {
+    const e = FIELDS.get(id);
+    if (!e) return;
+    if (e.si !== cur) goTo(e.si, { scroll: false, focus: false });
+    const w = WRAP.get(id);
+    if (w.hidden) return;
+    w.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
+    const t = $('input:not(.hp), select, textarea', w);
+    if (t) setTimeout(() => t.focus({ preventScroll: true }), reduced() ? 0 : 320);
+  }
+  function setBusy(on, text) {
+    busy = on;
+    const b = byId('btn-next');
+    b.disabled = on;
+    if (on && text) b.textContent = text.length > 8 ? '請稍候…' : text;
+    status(on ? (text || '') : '');
+    if (!on) refresh();
+  }
+  function status(text) { byId('pager-status').textContent = text || ''; }
+
+  /* ---------- 更新畫面 ---------- */
+  let raf = 0, saveTimer = 0;
+  function schedule() {
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; refresh(); });
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveDraft, 700);
+  }
+  function refresh() {
+    const V = collect();
+    FIELDS.forEach(({ f }) => {
+      const w = WRAP.get(f.id), vis = visible(f.id, V);
+      w.hidden = !vis;
+      if (f.other) $('.other', w).hidden = !(vis && hasOther(f, V[f.id]));
+    });
+    let total = 0, done = 0;
+    const missing = [];
+    SCHEMA.forEach((sec, si) => {
+      let t = 0, d = 0, any = false, bad = false;
+      sec.fields.forEach(f => {
+        if (!visible(f.id, V)) return;
+        const msg = errorFor(f, V);
+        if (!isEmpty(V[f.id])) any = true;
+        if (f.required) { t++; if (msg) missing.push(f.id); else d++; }
+        if (msg && tried.has(si)) bad = true;
+      });
+      total += t; done += d;
+      const state = bad ? 'error' : t ? (d === t ? 'done' : 'todo') : ((any || (visited.has(si) && si !== cur)) ? 'done' : 'todo');
+      const btn = $(`.step-btn[data-i="${si}"]`);
+      $('.rod', btn).dataset.state = state;
+      btn.setAttribute('aria-label', `第 ${si + 1} 步：${sec.title}，${{ error: '有欄位要修正', done: '已完成', todo: '未完成' }[state]}`);
+      if (si === cur && byId('done').hidden) btn.setAttribute('aria-current', 'step'); else btn.removeAttribute('aria-current');
+    });
+    byId('rail-meta').textContent = `必填完成 ${done}／${total}`;
+    byId('btn-prev').hidden = cur === 0;
+    if (!busy) byId('btn-next').textContent = cur === LAST ? '送出病例' : '下一步';
+
+    const who = byId('whoami');
+    if (who) {
+      const ok = !stepErrors(0, V).length;
+      const text = ok ? `登錄者：${V.c_name}（${V.c_hospital}）` : '';
+      if (text !== whoText) {
+        whoText = text;
+        who.hidden = !ok;
+        who.textContent = '';
+        if (ok) who.append(text, ' ', h('button', { type: 'button', class: 'linkbtn', text: '修改', onclick: () => goTo(0) }));
+      }
+    }
+    if (cur === LAST) renderReview(V, missing, total);
+  }
+  function renderReview(V, missing, total) {
+    const rb = byId('review-body');
+    const link = id => h('li', {}, h('a', { href: `#${id}`, onclick: ev => { ev.preventDefault(); focusField(id); } }, where(id)));
+    rb.textContent = '';
+    if (missing.length) rb.append(h('p', { text: `還有 ${missing.length} 個必填沒填：` }), h('ul', { class: 'review-list miss' }, missing.map(link)));
+    else rb.append(h('p', { class: 'review-ok', text: `必填 ${total} 項都完成了，可以送出。` }));
+    const sugg = SUGGEST.filter(id => visible(id, V) && isEmpty(V[id]));
+    if (sugg.length) rb.append(h('p', { text: '這些選填資料對分析很有幫助，手邊有的話請補上：' }), h('ul', { class: 'review-list' }, sugg.map(link)));
+  }
+
+  /* ---------- 事件 ---------- */
+  function onChange(e) {
+    const t = e.target;
+    if (t.type === 'checkbox' && FIELDS.has(t.name)) {
+      const { f } = FIELDS.get(t.name);
+      if (f.exclusive && t.checked) {
+        const ex = f.exclusive.includes(t.value);
+        $$(`input[name="${f.id}"]`, WRAP.get(f.id)).forEach(o => { if (o !== t && (ex || f.exclusive.includes(o.value))) o.checked = false; });
+      }
+    }
+    if (t.id === 'access_code' && e.type === 'input') { const st = byId('code-status'); st.textContent = ''; st.className = 'code-status'; }
+    const w = t.closest('.field');
+    if (w && t.type !== 'file') {
+      const { f, si } = FIELDS.get(w.dataset.id);
+      const V = collect();
+      if (tried.has(si)) showStepErrors(si, V);
+      else if (w.classList.contains('invalid')) showErr(f, visible(f.id, V) ? errorFor(f, V) : '');
+    }
+    if (e.type === 'change') refresh();
+    schedule();
+  }
+  function onBlur(e) {
+    const t = e.target, w = t.closest('.field');
+    if (!w || t.type === 'file') return;
+    const { f, si } = FIELDS.get(w.dataset.id);
+    if (f.check && t.id === f.id) {
+      const code = t.value.trim().toUpperCase();
+      if (code) verifyCode(code).then(() => { const V = collect(); showErr(f, errorFor(f, V)); refresh(); });
+    }
+    if (['radio', 'checks', 'consent'].includes(f.type)) return;
+    const V = collect();
+    if (!isEmpty(V[f.id]) || tried.has(si)) showErr(f, visible(f.id, V) ? errorFor(f, V) : '');
+  }
+
+  /* ---------- 與後端溝通 ---------- */
+  async function api(body) {
+    const res = await fetch(CONFIG.ENDPOINT, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+  function errText(code) {
+    return ({
+      ACCESS_DENIED: '邀請碼不正確，請對照邀請訊息再輸入一次。',
+      NOT_CONFIGURED: '收案系統還沒啟用，請聯絡主持人。',
+      FILE_TOO_LARGE: `檔案超過 ${CONFIG.MAX_FILE_MB} MB。`,
+      TYPE_NOT_ALLOWED: '只接受圖片、PDF 或影片檔。',
+      CASE_NOT_FOUND: '找不到這個病例編號，請聯絡主持人。',
+      BAD_CASE_ID: '病例編號格式錯誤，請聯絡主持人。',
+      BAD_JSON: '資料格式錯誤，請重新整理頁面後再試一次。',
+      SERVER_ERROR: '收案系統發生錯誤，請稍後再試；一直失敗的話請聯絡主持人。',
+      NETWORK: '網路連線失敗。'
+    })[code] || '送出失敗，請稍後再試一次。';
+  }
+  async function verifyCode(code) {
+    const st = byId('code-status');
+    if (!CONFIG.ENDPOINT || !code) return 'unknown';
+    if (codeCache.has(code)) return codeCache.get(code);
+    st.className = 'code-status';
+    st.textContent = '正在確認邀請碼…';
+    try {
+      const r = await api({ action: 'check', accessCode: code });
+      const res = r && r.ok ? 'ok' : (r && r.error === 'ACCESS_DENIED') ? 'bad' : 'unknown';
+      if (res !== 'unknown') codeCache.set(code, res);
+      st.className = res === 'ok' ? 'code-status ok' : 'code-status';
+      st.textContent = res === 'ok' ? '邀請碼正確' : res === 'bad' ? '' : errText(r && r.error);
+      return res;
+    } catch (e) {
+      st.className = 'code-status';
+      st.textContent = '暫時無法確認邀請碼，送出時會再檢查一次。';
+      return 'unknown';
+    }
+  }
+  function buildPayload(V) {
+    const p = { action: 'submit', accessCode: V.access_code, website: byId('website').value, contributor: {}, case: { site_city: V.c_city, form_version: CONFIG.FORM_VERSION } };
+    SCHEMA.forEach(sec => sec.fields.forEach(f => {
+      if (f.meta) return;
+      const vis = visible(f.id, V);
+      if (f.type === 'files') { p.case[`${f.id}_n`] = vis ? V[f.id].length : 0; return; }
+      const target = (f.group || sec.group) === 'contributor' ? p.contributor : p.case;
+      let val = vis ? V[f.id] : '';
+      if (Array.isArray(val)) val = val.join('; ');
+      if (typeof val === 'boolean') val = val ? '是' : '否';
+      target[f.id] = val;
+      if (f.other) target[`${f.id}_other`] = (vis && hasOther(f, V[f.id])) ? V[`${f.id}_other`] : '';
+    }));
+    return p;
+  }
+  function setMsg(content, bad) {
+    const m = byId('submit-msg');
+    m.textContent = '';
+    m.className = `submit-msg${bad ? ' bad' : ''}`;
+    if (content) m.append(content);
+    m.hidden = !content;
+  }
+
+  async function submit() {
+    if (busy) return;
+    const V = collect();
+    const errs = [];
+    SCHEMA.forEach((s, si) => { tried.add(si); errs.push(...stepErrors(si, V)); showStepErrors(si, V); });
+    refresh();
+    if (errs.length) { focusField(errs[0].f.id); return; }
+    const payload = buildPayload(V);
+    if (!CONFIG.ENDPOINT) {
+      const shown = Object.assign({}, payload, { accessCode: payload.accessCode ? '（已填）' : '' });
+      const frag = document.createDocumentFragment();
+      frag.append(h('p', { text: '預覽模式：還沒設定收案後端，資料沒有送出。下面是實際會送出的內容，附件會在送出後另外上傳。' }), h('pre', { class: 'preview', text: JSON.stringify(shown, null, 2) }));
+      setMsg(frag, false);
+      return;
+    }
+    await send(payload, V);
+  }
+
+  async function send(payload, V) {
+    setMsg('');
+    setBusy(true, '正在送出病例資料…');
+    let res;
+    try { res = await api(payload); }
+    catch (err) {
+      setBusy(false);
+      setMsg('網路連線失敗，資料沒有送出。表單內容還在，請稍後再按一次「送出病例」。', true);
+      return;
+    }
+    if (!res || !res.ok) {
+      setBusy(false);
+      const msg = errText(res && res.error);
+      if (res && res.error === 'ACCESS_DENIED') {
+        codeCache.set(payload.accessCode, 'bad');
+        tried.add(0);
+        showErr(FIELDS.get('access_code').f, msg);
+        refresh();
+        focusField('access_code');
+      } else setMsg(msg, true);
+      return;
+    }
+    lastCase = res.caseId;
+    lastCode = payload.accessCode;
+    codeCache.set(lastCode, 'ok');
+    lastJobs = [];
+    SCHEMA.forEach(sec => sec.fields.forEach(f => {
+      if (f.type === 'files' && visible(f.id, V)) (fileStore[f.id] || []).forEach(file => lastJobs.push({ label: labelText(f), category: f.id, file, ok: false, err: '' }));
+    }));
+    await runUploads(t => status(t));
+    store.set(CONTRIB_KEY, contributorValues(V));
+    store.del(DRAFT_KEY);
+    setBusy(false);
+    showDone();
+  }
+  async function runUploads(onProgress) {
+    const todo = lastJobs.filter(j => !j.ok);
+    for (let i = 0; i < todo.length; i++) {
+      const j = todo[i];
+      if (onProgress) onProgress(`正在上傳附件 ${i + 1}／${todo.length}：${j.file.name}`);
+      try {
+        const data = await toBase64(j.file);
+        const r = await api({ action: 'upload', accessCode: lastCode, caseId: lastCase, category: j.category, fileName: j.file.name, mimeType: mimeOf(j.file), data });
+        j.ok = !!(r && r.ok);
+        j.err = j.ok ? '' : errText(r && r.error);
+      } catch (e) { j.ok = false; j.err = errText('NETWORK'); }
+    }
+  }
+
+  function showDone() {
+    const done = byId('done');
+    const failed = lastJobs.filter(j => !j.ok);
+    done.textContent = '';
+    done.append(
+      h('h2', { class: 'done-title', id: 'done-title', tabindex: '-1', text: '病例已登錄' }),
+      h('p', { class: 'case-id', id: 'case-id', text: lastCase }),
+      h('p', { text: '請把這個病例編號記在院內病歷。主持人詢問缺漏資料時會用它；病例編號和病歷號的對照也請院內自行保存。' })
+    );
+    if (lastJobs.length) {
+      done.append(h('h3', { text: `附件 ${lastJobs.length - failed.length}／${lastJobs.length} 已上傳` }), h('ul', { class: 'up-list' }, lastJobs.map(j => h('li', { class: j.ok ? 'ok' : 'bad' }, h('span', { class: 'mark', text: j.ok ? '已上傳' : '失敗' }), h('span', { class: 'fname', text: `${j.label}：${j.file.name}` }), j.ok ? null : h('span', { class: 'why', text: j.err })))));
+    }
+    const copyBtn = h('button', { type: 'button', class: 'btn-secondary', text: '複製病例編號' });
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(lastCase); copyBtn.textContent = '已複製'; }
+      catch (e) { const r = document.createRange(); r.selectNodeContents(byId('case-id')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copyBtn.textContent = '已選取，請按複製'; }
+    });
+    const acts = h('div', { class: 'actions' }, copyBtn);
+    if (failed.length) acts.append(h('button', { type: 'button', class: 'btn-secondary', text: '重試失敗的附件', onclick: async ev => { ev.target.disabled = true; ev.target.textContent = '正在重試…'; await runUploads(null); showDone(); } }));
+    acts.append(h('button', { type: 'button', class: 'btn-primary', text: '登錄下一例', onclick: nextCase }));
+    done.append(acts, h('p', { class: 'help', text: failed.length ? '失敗的附件可以重試；一直失敗的話，請直接寄給主持人並註明病例編號。' : '「登錄下一例」會保留你的資料，從基本資料開始填。' }));
+    byId('crf').hidden = true;
+    done.hidden = false;
+    $$('.step-btn').forEach(b => b.removeAttribute('aria-current'));
+    $$('.rod').forEach(r => { r.dataset.state = 'done'; });
+    byId('rail-meta').textContent = '';
+    byId('app').scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' });
+    byId('done-title').focus({ preventScroll: true });
+  }
+  function nextCase() {
+    const keep = contributorValues(collect());
+    FIELDS.forEach(({ f }) => {
+      if (f.keep) return;
+      setValue(f, f.type === 'checks' ? [] : f.type === 'consent' ? false : '');
+      if (f.other) byId(`${f.id}_other`).value = '';
+    });
+    FIELDS.forEach(({ f }) => showErr(f, ''));
+    applyValues(keep);
+    tried.clear();
+    visited.clear();
+    lastJobs = []; lastCase = '';
+    setMsg('');
+    goTo(1);
+  }
+
+  /* ---------- 草稿 ---------- */
+  function saveDraft() {
+    if (!byId('done').hidden || busy) return;
+    const V = collect();
+    const meaningful = SCHEMA.some(sec => sec.group === 'case' && sec.fields.some(f => f.type !== 'files' && !isEmpty(V[f.id])));
+    if (!meaningful) return;
+    const data = {};
+    Object.entries(V).forEach(([k, v]) => { if (!(FIELDS.has(k) && FIELDS.get(k).f.type === 'files')) data[k] = v; });
+    if (store.set(DRAFT_KEY, { t: Date.now(), v: data, step: cur })) status(`已存草稿 ${hhmm(new Date())}`);
+  }
+  function banner(kind, text, actions) {
+    const b = h('div', { class: `banner ${kind}`, id: `banner-${kind}`, role: 'status' }, h('span', { class: 'banner-text', html: text }));
+    (actions || []).forEach(([label, fn]) => b.append(h('button', { type: 'button', class: 'banner-btn', text: label, onclick: fn })));
+    byId('banners').append(b);
+  }
+  const closeBanner = kind => { const b = byId(`banner-${kind}`); if (b) b.remove(); };
+
+  /* ---------- 資料字典 ---------- */
+  const DICT_COLS = [['sec', '段落'], ['id', '變項代碼'], ['label', '欄位'], ['type', '類型'], ['options', '選項或單位'], ['required', '必填'], ['cond', '顯示條件']];
+  function openDict() {
+    const body = byId('dict-body');
+    if (!body.dataset.built) {
+      const cols = DICT_COLS.filter(([k]) => k !== 'sec');
+      const tbody = h('tbody');
+      let sec = '';
+      dictRows().forEach(r => {
+        if (r.sec !== sec) { sec = r.sec; tbody.append(h('tr', { class: 'dict-sec' }, h('th', { colspan: String(cols.length), scope: 'colgroup', text: sec }))); }
+        tbody.append(h('tr', {}, cols.map(([k]) => h('td', {}, k === 'id' ? h('code', { text: r.id }) : r[k]))));
+      });
+      body.append(h('table', {}, h('thead', {}, h('tr', {}, cols.map(([, t]) => h('th', { scope: 'col', text: t })))), tbody));
+      body.dataset.built = '1';
+    }
+    const dlg = byId('dict');
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  }
+  function downloadDict() {
+    const esc = s => `"${String(s == null ? '' : s).replace(/"/g, '""')}"`;
+    const lines = [DICT_COLS.map(([, t]) => esc(t)).join(','), ...dictRows().map(r => DICT_COLS.map(([k]) => esc(r[k])).join(','))];
+    const url = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    const a = h('a', { href: url, download: 'neisseria-crf-data-dictionary.csv' });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  /* ---------- 啟動 ---------- */
+  function boot() {
+    render();
+    const [y, m, d] = CONFIG.DEADLINE.split('-').map(Number);
+    byId('fact-deadline').textContent = `${y} 年 ${m} 月 ${d} 日`;
+    byId('fact-pi').textContent = `${CONFIG.PI}，${CONFIG.HOSPITAL}`;
+    byId('form-version').textContent = CONFIG.FORM_VERSION;
+
+    const form = byId('crf');
+    form.addEventListener('input', onChange);
+    form.addEventListener('change', onChange);
+    form.addEventListener('focusout', onBlur);
+    form.addEventListener('submit', e => e.preventDefault());
+    form.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox' && e.target.type !== 'radio') e.preventDefault(); });
+    byId('btn-prev').addEventListener('click', () => { if (!busy) goTo(cur - 1); });
+    byId('btn-next').addEventListener('click', next);
+    byId('btn-dict').addEventListener('click', openDict);
+    byId('dict-close').addEventListener('click', () => { const dlg = byId('dict'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+    byId('dict-csv').addEventListener('click', downloadDict);
+
+    if (!CONFIG.ENDPOINT) banner('demo', '預覽模式：還沒設定收案後端，送出時只會顯示將送出的資料，不會儲存。');
+    let start = 0;
+    const c = store.get(CONTRIB_KEY);
+    if (c) { applyValues(c); if (!stepErrors(0, collect()).length) start = 1; }
+    const draft = store.get(DRAFT_KEY);
+    if (draft && draft.v) {
+      const t = new Date(draft.t);
+      banner('draft', `這台電腦上有一份還沒送出的草稿（${t.getMonth() + 1}/${t.getDate()} ${hhmm(t)}）。`, [
+        ['恢復草稿', () => { applyValues(draft.v); closeBanner('draft'); goTo(Math.min(LAST, draft.step || 0)); }],
+        ['捨棄', () => { store.del(DRAFT_KEY); closeBanner('draft'); }]
+      ]);
+    }
+    goTo(start, { scroll: false, focus: false });
+    if (location.hash === '#dictionary') openDict();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
