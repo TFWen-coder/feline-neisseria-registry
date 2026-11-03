@@ -336,7 +336,7 @@ const SCHEMA = [
     { id: 'c_city', type: 'select', label: '醫院所在縣市', required: true, keep: true, options: CITIES },
     { id: 'c_email', type: 'email', label: 'Email', required: true, keep: true, autocomplete: 'email', help: '主持人詢問缺漏資料時用。' },
     { id: 'c_phone', type: 'text', label: '電話或 LINE ID', keep: true },
-    { id: 'c_author', type: 'radio', label: '有興趣參與論文審閱、列名共同作者嗎？', keep: true, options: ['有興趣', '沒有', '想先了解'], help: '共同作者須提供病例、完成登錄，並參與審閱定稿。' },
+    { id: 'c_author', type: 'radio', label: '有興趣參與論文審閱、列名共同作者嗎？', keep: true, options: ['有興趣', '沒有', '想先了解'], help: '依期刊規範，只提供病例不構成作者資格：醫院提供的病例數須超過最終總數的 10%，並參與修稿與定稿；其餘列致謝。' },
     { id: 'c_consent', type: 'consent', label: '院長或負責獸醫師已同意本院以去識別化方式提供病例資料', required: true, keep: true }
   ] },
   { id: 'signalment', group: 'case', short: '基本資料', title: '基本資料與病史', who: true, fields: [
