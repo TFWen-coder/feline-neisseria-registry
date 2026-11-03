@@ -315,7 +315,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.0',
+  FORM_VERSION: '2.1',
   MAX_FILE_MB: 10
 };
 
@@ -324,6 +324,8 @@ const CITIES = ['基隆市', '臺北市', '新北市', '桃園市', '新竹市',
 const YNU = ['有', '無', '不明'];
 const ABX = ['Amoxicillin-clavulanate', 'Ampicillin 或 ampicillin-sulbactam', 'Cefazolin', 'Cefovecin', '第三代頭孢菌素', 'Enrofloxacin', 'Marbofloxacin', 'Pradofloxacin', 'Doxycycline', 'TMP-SMX', 'Metronidazole', 'Clindamycin', 'Gentamicin 或 amikacin', '其他'];
 const ABX_USED = { f: 't_main', has: '抗生素' };
+const SURGERY = { f: 't_main', has: '手術（心包切除或開窗）' };
+const ABX_WAITED = '等培養結果才開始用';
 const CYTO_DONE = { f: 'f_cyto', in: ['化膿性滲出液', '其他發炎性滲出液', '其他'] };
 const DIED = { any: [{ f: 'o_last_status', eq: '死亡（含安樂死）' }, { f: 'o_discharge', in: ['院內死亡', '院內安樂死'] }] };
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
@@ -334,8 +336,9 @@ const SCHEMA = [
     { id: 'c_name', type: 'text', label: '姓名', required: true, keep: true, autocomplete: 'name' },
     { id: 'c_hospital', type: 'text', label: '醫院', required: true, keep: true, autocomplete: 'organization' },
     { id: 'c_city', type: 'select', label: '醫院所在縣市', required: true, keep: true, options: CITIES },
-    { id: 'c_email', type: 'email', label: 'Email', required: true, keep: true, autocomplete: 'email', help: '主持人詢問缺漏資料時用。' },
-    { id: 'c_phone', type: 'text', label: '電話或 LINE ID', keep: true },
+    { id: 'c_email', type: 'email', label: 'Email', required: true, keep: true, span: 2, autocomplete: 'email', help: '主持人詢問缺漏資料時用。' },
+    { id: 'c_phone', type: 'text', label: '電話', keep: true, span: 2, autocomplete: 'tel', inputmode: 'tel', placeholder: '手機或醫院電話' },
+    { id: 'c_line', type: 'text', label: 'LINE ID', keep: true, span: 2, help: '補問資料或更新追蹤時聯絡用。' },
     { id: 'c_author', type: 'radio', label: '有興趣參與論文審閱、列名共同作者嗎？', keep: true, options: ['有興趣', '沒有', '想先了解'], help: '依期刊規範，只提供病例不構成作者資格：醫院提供的病例數須超過最終總數的 10%，並參與修稿與定稿；其餘列致謝。' },
     { id: 'c_consent', type: 'consent', label: '院長或負責獸醫師已同意本院以去識別化方式提供病例資料', required: true, keep: true }
   ] },
@@ -407,15 +410,21 @@ const SCHEMA = [
     { id: 't_main', type: 'checks', label: '主要治療', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔引流管', '手術（心包切除或開窗）', '抗生素', '未治療或診斷後即安樂死'], exclusive: ['未治療或診斷後即安樂死'] },
     { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
     { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
-    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: { f: 't_main', has: '手術（心包切除或開窗）' } },
-    { id: 't_abx_drugs', type: 'checks', label: '用過的抗生素', options: ABX, other: true, showIf: ABX_USED },
-    { id: 't_abx_change', type: 'radio', label: '有依藥敏結果換藥嗎？', options: ['有換藥', '沒有換藥', '沒有藥敏結果'], showIf: ABX_USED },
+    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
+    { id: 't_surgery_day', type: 'number', label: '手術距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: SURGERY, help: '診斷當天手術填 0。' },
+    { id: 't_surgery_why', type: 'radio', label: '手術時機', options: ['一開始就安排手術', '穿刺或引流效果不佳', '復發後才手術'], span: 4, showIf: SURGERY },
+    { id: 't_abx_first', type: 'checks', label: '一開始用的抗生素（培養結果出來前）', required: true, options: [...ABX, ABX_WAITED], exclusive: [ABX_WAITED], other: true, showIf: ABX_USED, help: '用來判斷經驗性用藥是否涵蓋分離到的菌。' },
+    { id: 't_abx_change', type: 'radio', label: '看到藥敏結果後，有換藥或加藥嗎？', options: ['有', '沒有', '沒有藥敏結果'], showIf: ABX_USED },
+    { id: 't_abx_after', type: 'checks', label: '換成或加上的抗生素', options: ABX, other: true, showIf: { f: 't_abx_change', eq: '有' } },
     { id: 't_abx_total', type: 'number', label: '抗生素總療程', unit: '天', min: 0, max: 365, int: true, showIf: ABX_USED },
     { id: 't_hosp_days', type: 'number', label: '住院天數', unit: '天', min: 0, max: 365, int: true },
     { id: 't_dental', type: 'radio', label: '治療期間或之後有做牙科處置嗎？', options: ['沒有', '洗牙', '拔牙', '不明'] },
     { id: 'o_discharge', type: 'radio', label: '住院結果', required: true, options: ['存活出院', '院內死亡', '院內安樂死', '未住院'] },
     { id: 'o_last_date', type: 'date', label: '最後追蹤日', required: true, min: '2015-01-01', span: 2, help: '死亡病例填死亡日。', validate: V => (V.s_dx_date && V.o_last_date && V.o_last_date < V.s_dx_date) ? '不能早於診斷日' : '' },
     { id: 'o_last_status', type: 'radio', label: '最後狀態', required: true, options: ['存活', '死亡（含安樂死）', '失聯'], span: 4, validate: V => (['院內死亡', '院內安樂死'].includes(V.o_discharge) && V.o_last_status && V.o_last_status !== '死亡（含安樂死）') ? '住院期間死亡的病例，最後狀態應為「死亡（含安樂死）」' : '' },
+    { id: 'o_death_mode', type: 'radio', label: '死亡方式', required: true, options: ['自然死亡', '安樂死：病情惡化或預後差', '安樂死：經濟考量', '安樂死：其他原因', '不明'], showIf: DIED,
+      validate: V => (V.o_discharge === '院內死亡' && V.o_death_mode && V.o_death_mode !== '自然死亡') ? '住院結果是「院內死亡」，這裡應選「自然死亡」'
+        : (V.o_discharge === '院內安樂死' && V.o_death_mode && !V.o_death_mode.startsWith('安樂死')) ? '住院結果是「院內安樂死」，請選安樂死的原因' : '' },
     { id: 'o_death_related', type: 'radio', label: '死亡和這次的病有關嗎？', options: ['有關', '無關', '不明'], showIf: DIED },
     { id: 'o_death_cause', type: 'text', label: '死亡或安樂死的原因', span: 6, showIf: DIED },
     { id: 'o_recur', type: 'radio', label: '心包積液復發', options: YNU, span: 3 },
@@ -464,7 +473,7 @@ function dictRows() {
   const DRAFT_KEY = 'np-crf-draft-v2';
   const CONTRIB_KEY = 'np-crf-contributor-v2';
   const LAST = SCHEMA.length - 1;
-  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_abx_drugs', 't_abx_total', 't_hosp_days'];
+  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_surgery_why', 't_abx_change', 't_abx_total', 't_hosp_days', 'o_recur'];
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const byId = id => document.getElementById(id);
@@ -547,7 +556,7 @@ function dictRows() {
       const isNum = f.type === 'number';
       const inp = h('input', {
         id: f.id, name: f.id, class: `input${f.upper ? ' upper' : ''}`, type: isNum ? 'text' : f.type,
-        inputmode: isNum ? ((f.step || 1) < 1 ? 'decimal' : 'numeric') : (f.type === 'email' ? 'email' : null),
+        inputmode: f.inputmode || (isNum ? ((f.step || 1) < 1 ? 'decimal' : 'numeric') : (f.type === 'email' ? 'email' : null)),
         autocomplete: f.autocomplete || 'off', placeholder: f.placeholder || null, spellcheck: 'false',
         autocapitalize: f.upper ? 'characters' : null,
         min: f.type === 'date' ? (f.min || null) : null, max: f.type === 'date' ? TODAY : null,
