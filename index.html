@@ -315,7 +315,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.2',
+  FORM_VERSION: '2.3',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -423,11 +423,11 @@ const SCHEMA = [
     { id: 'o_discharge', type: 'radio', label: '住院結果', required: true, options: ['存活出院', '院內死亡', '院內安樂死', '未住院'] },
     { id: 'o_last_date', type: 'date', label: '最後追蹤日', required: true, min: '2015-01-01', span: 2, help: '死亡病例填死亡日。', validate: V => (V.s_dx_date && V.o_last_date && V.o_last_date < V.s_dx_date) ? '不能早於診斷日' : '' },
     { id: 'o_last_status', type: 'radio', label: '最後狀態', required: true, options: ['存活', '死亡（含安樂死）', '失聯'], span: 4, validate: V => (['院內死亡', '院內安樂死'].includes(V.o_discharge) && V.o_last_status && V.o_last_status !== '死亡（含安樂死）') ? '住院期間死亡的病例，最後狀態應為「死亡（含安樂死）」' : '' },
-    { id: 'o_death_mode', type: 'radio', label: '死亡方式', required: true, options: ['自然死亡', '安樂死：病情惡化或預後差', '安樂死：經濟考量', '安樂死：其他原因', '不明'], showIf: DIED,
-      validate: V => (V.o_discharge === '院內死亡' && V.o_death_mode && V.o_death_mode !== '自然死亡') ? '住院結果是「院內死亡」，這裡應選「自然死亡」'
+    { id: 'o_death_mode', type: 'radio', label: '死亡方式', required: true, options: ['自然死亡（含猝死）', '安樂死：病情惡化或預後差', '安樂死：經濟考量', '安樂死：其他原因', '不明'], showIf: DIED,
+      validate: V => (V.o_discharge === '院內死亡' && V.o_death_mode && !V.o_death_mode.startsWith('自然死亡')) ? '住院結果是「院內死亡」，這裡應選「自然死亡（含猝死）」'
         : (V.o_discharge === '院內安樂死' && V.o_death_mode && !V.o_death_mode.startsWith('安樂死')) ? '住院結果是「院內安樂死」，請選安樂死的原因' : '' },
     { id: 'o_death_related', type: 'radio', label: '死亡和這次的病有關嗎？', options: ['有關', '無關', '不明'], showIf: DIED },
-    { id: 'o_death_cause', type: 'text', label: '死亡或安樂死的原因', span: 6, showIf: DIED },
+    { id: 'o_death_cause', type: 'text', label: '死亡或安樂死的原因', span: 6, showIf: DIED, placeholder: '例：回診前一天在家猝死，沒有剖檢' },
     { id: 'o_recur', type: 'radio', label: '心包積液復發', options: YNU, span: 3 },
     { id: 'o_constrict', type: 'radio', label: '縮窄性心包炎', options: YNU, span: 3 },
     { id: 'o_recur_day', type: 'number', label: '復發距診斷日', unit: '天', min: 0, max: 5000, int: true, showIf: { f: 'o_recur', eq: '有' } },
