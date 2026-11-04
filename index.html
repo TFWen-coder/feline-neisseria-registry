@@ -325,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.5',
+  FORM_VERSION: '2.6',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -335,8 +335,9 @@ const CITIES = ['基隆市', '臺北市', '新北市', '桃園市', '新竹市',
 const YNU = ['有', '無', '不明'];
 const ABX = ['Amoxicillin-clavulanate', 'Ampicillin 或 ampicillin-sulbactam', 'Cefazolin', 'Cefovecin', '第三代頭孢菌素', 'Enrofloxacin', 'Marbofloxacin', 'Pradofloxacin', 'Doxycycline', 'TMP-SMX', 'Metronidazole', 'Clindamycin', 'Gentamicin 或 amikacin', '其他'];
 const UNTREATED = '未治療或診斷後即安樂死';
-const TREATED = { f: 't_main', nothas: UNTREATED };
-const SURGERY = { f: 't_main', has: '手術（心包切除或開窗）' };
+const TREATED = { f: 't_main', lacks: UNTREATED };
+const SURGERY_OPT = '手術（心包切開、切除或開窗）';
+const SURGERY = { f: 't_main', has: SURGERY_OPT };
 const ABX_WAITED = '等培養結果才開始用';
 const NO_ABX = '沒有用抗生素';
 const ABX_GIVEN = { f: 't_abx_first', nothas: NO_ABX };
@@ -423,10 +424,10 @@ const SCHEMA = [
     { id: 'm_other_cx', type: 'text', label: '其他部位的培養結果', span: 6, placeholder: '例：腹水陰性；肺部 FNA 長出 N. animaloris' }
   ] },
   { id: 'outcome', group: 'case', short: '治療與結局', title: '治療與結局', fields: [
-    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔引流管', '手術（心包切除或開窗）', UNTREATED], exclusive: [UNTREATED], help: '用藥在下面另外問。' },
+    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔引流管（胸管）', SURGERY_OPT, UNTREATED], exclusive: [UNTREATED], help: '可複選。抗生素和其他用藥在下面。' },
     { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
     { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
-    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
+    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸心包切開', '開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
     { id: 't_surgery_day', type: 'number', label: '手術距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: SURGERY, help: '診斷當天手術填 0。' },
     { id: 't_surgery_why', type: 'radio', label: '手術時機', options: ['一開始就安排手術', '穿刺或引流效果不佳', '復發後才手術'], span: 4, showIf: SURGERY },
     { id: 't_abx_first', type: 'checks', label: '一開始用的抗生素（培養結果出來前）', required: true, options: [...ABX, ABX_WAITED, NO_ABX], exclusive: [ABX_WAITED, NO_ABX], other: true, showIf: TREATED, help: '用來判斷經驗性用藥是否涵蓋分離到的菌。' },
@@ -460,7 +461,7 @@ const SCHEMA = [
 function dictRows() {
   const T = { text: '文字', email: 'Email', number: '數字', date: '日期', select: '單選', radio: '單選', checks: '複選', textarea: '長文字', consent: '勾選確認', files: '附件數量', drugs: '用法明細' };
   const ACC = { 'image/*': '圖片', 'application/pdf': 'PDF', 'video/*': '影片' };
-  const condText = c => c.any ? c.any.map(condText).join('，或 ') : c.all ? c.all.map(condText).join('，且 ') : `${c.f}${'eq' in c ? ` 為「${c.eq}」` : c.in ? ` 為「${c.in.join('」或「')}」` : c.has ? ` 含「${c.has}」` : c.nothas ? ` 已選且不含「${c.nothas}」` : ' 有填'}`;
+  const condText = c => c.any ? c.any.map(condText).join('，或 ') : c.all ? c.all.map(condText).join('，且 ') : `${c.f}${'eq' in c ? ` 為「${c.eq}」` : c.in ? ` 為「${c.in.join('」或「')}」` : c.has ? ` 含「${c.has}」` : c.nothas ? ` 已選且不含「${c.nothas}」` : c.lacks ? ` 不含「${c.lacks}」` : ' 有填'}`;
   const opts = f => f.options ? f.options.join('／')
     : f.type === 'number' ? [f.unit, `${f.min}–${f.max}`].filter(Boolean).join('，')
     : f.type === 'date' ? 'YYYY-MM-DD'
@@ -766,6 +767,7 @@ function dictRows() {
     if ('in' in c) return c.in.includes(v);
     if ('has' in c) return Array.isArray(v) && v.includes(c.has);
     if ('nothas' in c) return Array.isArray(v) && v.length > 0 && !v.includes(c.nothas);
+    if ('lacks' in c) return !(Array.isArray(v) && v.includes(c.lacks));
     return !isEmpty(v);
   }
   function visible(id, V, depth = 0) {
