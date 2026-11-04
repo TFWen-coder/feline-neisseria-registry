@@ -131,6 +131,16 @@ textarea.input{resize:vertical;line-height:1.65}
 .btn-file{display:inline-block;padding:7px 14px;border-radius:8px;border:1px solid var(--violet);color:var(--violet);font-size:15px;font-weight:500;cursor:pointer;line-height:1.4}
 .sr-file:focus-visible+.btn-file{outline:2px solid var(--violet);outline-offset:2px}
 .file-hint{font-size:13.5px;color:var(--ink-2)}
+.drug-list{display:grid;gap:10px}
+.drug-row{border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;background:var(--surface)}
+.drug-name{font-weight:500;font-size:14.5px;margin:0 0 8px}
+.drug-cells{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px 10px}
+.drug-cells.named{grid-template-columns:repeat(6,minmax(0,1fr))}
+.drug-cell{display:block;min-width:0}
+.drug-k{display:block;font-size:12.5px;color:var(--ink-2);margin:0 0 3px}
+.drug-cell .input{padding:8px 9px;font-size:15px}
+.drug-empty{font-size:14px;color:var(--ink-2);margin:0}
+@media (max-width:760px){.drug-cells,.drug-cells.named{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .file-list{list-style:none;margin:6px 0 0;padding:0}
 .file-list:empty{display:none}
 .file-list li{display:flex;align-items:center;gap:10px;padding:4px 2px;font-size:14.5px;border-bottom:1px solid var(--line)}
@@ -315,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.4',
+  FORM_VERSION: '2.5',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -330,6 +340,8 @@ const SURGERY = { f: 't_main', has: '手術（心包切除或開窗）' };
 const ABX_WAITED = '等培養結果才開始用';
 const NO_ABX = '沒有用抗生素';
 const ABX_GIVEN = { f: 't_abx_first', nothas: NO_ABX };
+const ROUTES = ['PO', 'SC', 'IV', 'IM'];
+const FREQS = ['SID', 'BID', 'TID', '長效或單次', '其他'];
 const CYTO_DONE = { f: 'f_cyto', in: ['化膿性滲出液', '其他發炎性滲出液', '其他'] };
 const DIED = { any: [{ f: 'o_last_status', eq: '死亡（含安樂死）' }, { f: 'o_discharge', in: ['院內死亡', '院內安樂死'] }] };
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
@@ -420,8 +432,10 @@ const SCHEMA = [
     { id: 't_abx_first', type: 'checks', label: '一開始用的抗生素（培養結果出來前）', required: true, options: [...ABX, ABX_WAITED, NO_ABX], exclusive: [ABX_WAITED, NO_ABX], other: true, showIf: TREATED, help: '用來判斷經驗性用藥是否涵蓋分離到的菌。' },
     { id: 't_abx_change', type: 'radio', label: '看到藥敏結果後，有換藥或加藥嗎？', options: ['有', '沒有', '沒有藥敏結果'], showIf: ABX_GIVEN },
     { id: 't_abx_after', type: 'checks', label: '換成或加上的抗生素', options: ABX, other: true, showIf: { f: 't_abx_change', eq: '有' } },
+    { id: 't_abx_detail', type: 'drugs', label: '抗生素用法', from: ['t_abx_first', 't_abx_after'], skip: [ABX_WAITED, NO_ABX], showIf: ABX_GIVEN, help: '依上面勾的抗生素自動列出，照病歷填；不知道的格子留空。診斷當天算第 0 天。' },
     { id: 't_abx_total', type: 'number', label: '抗生素總療程', unit: '天', min: 0, max: 365, int: true, showIf: ABX_GIVEN },
     { id: 't_other_drugs', type: 'checks', label: '其他用藥', required: true, options: ['NSAID（如 meloxicam、robenacoxib）', '類固醇（如 prednisolone、dexamethasone）', '利尿劑（如 furosemide）', '止痛藥（如 buprenorphine）', '其他', '沒有'], exclusive: ['沒有'], other: true, showIf: TREATED },
+    { id: 't_other_detail', type: 'drugs', label: '其他用藥用法', from: ['t_other_drugs'], skip: ['沒有'], named: true, showIf: { f: 't_other_drugs', nothas: '沒有' }, help: '每類藥寫藥名和用法；不知道的格子留空。' },
     { id: 't_hosp_days', type: 'number', label: '住院天數', unit: '天', min: 0, max: 365, int: true },
     { id: 't_dental', type: 'radio', label: '治療期間或之後有做牙科處置嗎？', options: ['沒有', '洗牙', '拔牙', '不明'] },
     { id: 'o_discharge', type: 'radio', label: '住院結果', required: true, options: ['存活出院', '院內死亡', '院內安樂死', '未住院'] },
@@ -444,14 +458,15 @@ const SCHEMA = [
 
 /* 資料字典：網頁的「資料字典」與計畫書的變項清單都由這裡產生 */
 function dictRows() {
-  const T = { text: '文字', email: 'Email', number: '數字', date: '日期', select: '單選', radio: '單選', checks: '複選', textarea: '長文字', consent: '勾選確認', files: '附件數量' };
+  const T = { text: '文字', email: 'Email', number: '數字', date: '日期', select: '單選', radio: '單選', checks: '複選', textarea: '長文字', consent: '勾選確認', files: '附件數量', drugs: '用法明細' };
   const ACC = { 'image/*': '圖片', 'application/pdf': 'PDF', 'video/*': '影片' };
   const condText = c => c.any ? c.any.map(condText).join('，或 ') : c.all ? c.all.map(condText).join('，且 ') : `${c.f}${'eq' in c ? ` 為「${c.eq}」` : c.in ? ` 為「${c.in.join('」或「')}」` : c.has ? ` 含「${c.has}」` : c.nothas ? ` 已選且不含「${c.nothas}」` : ' 有填'}`;
   const opts = f => f.options ? f.options.join('／')
     : f.type === 'number' ? [f.unit, `${f.min}–${f.max}`].filter(Boolean).join('，')
     : f.type === 'date' ? 'YYYY-MM-DD'
     : f.type === 'files' ? f.accept.split(',').map(a => ACC[a] || a).join('、')
-    : f.type === 'consent' ? '是' : '';
+    : f.type === 'consent' ? '是'
+    : f.type === 'drugs' ? `每種藥一段：${f.named ? '藥名、' : ''}劑量（mg/kg）、途徑（${ROUTES.join('／')}）、頻率（${FREQS.join('／')}）、第幾天開始、天數` : '';
   const rows = [];
   SCHEMA.forEach((s, i) => {
     const sec = `${i + 1}. ${s.title}${s.group === 'contributor' ? '（另存於登錄者資料）' : ''}`;
@@ -478,7 +493,7 @@ function dictRows() {
   const DRAFT_KEY = 'np-crf-draft-v2';
   const CONTRIB_KEY = 'np-crf-contributor-v2';
   const LAST = SCHEMA.length - 1;
-  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_surgery_why', 't_abx_change', 't_abx_total', 't_hosp_days', 'o_recur'];
+  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_surgery_why', 't_abx_change', 't_abx_detail', 't_abx_total', 't_hosp_days', 'o_recur'];
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const byId = id => document.getElementById(id);
@@ -486,6 +501,7 @@ function dictRows() {
   const WRAP = new Map();
   SCHEMA.forEach((sec, si) => sec.fields.forEach(f => FIELDS.set(f.id, { f, sec, si })));
   const fileStore = {};
+  const drugStore = {};
   let chunked = false; // 後端支援分段上傳時為 true，檔案就不限大小
   const tried = new Set();
   const visited = new Set();
@@ -583,6 +599,18 @@ function dictRows() {
     } else if (f.type === 'files') {
       w.append(labelInto(h('label', { class: 'lab', for: f.id }), f));
       renderFiles(f, w, desc);
+    } else if (f.type === 'drugs') {
+      const list = h('div', { class: 'drug-list', id: `dl-${f.id}` });
+      const keep = e => {
+        const t = e.target, row = t.closest('.drug-row');
+        if (!row || !t.dataset.k) return;
+        const s = drugStore[f.id][row.dataset.drug] = drugStore[f.id][row.dataset.drug] || {};
+        s[t.dataset.k] = t.value.trim();
+      };
+      list.addEventListener('input', keep);
+      list.addEventListener('change', keep);
+      drugStore[f.id] = {};
+      w.append(h('fieldset', { 'aria-describedby': desc }, labelInto(h('legend'), f), list));
     }
     if (f.other) w.append(h('div', { class: 'other', hidden: true }, h('input', { id: `${f.id}_other`, class: 'input', type: 'text', placeholder: `請說明「${otherOf(f)}」`, 'aria-label': `${labelText(f)}：其他說明` })));
     if (f.help) w.append(h('p', { class: 'help', id: helpId, html: f.help }));
@@ -629,6 +657,46 @@ function dictRows() {
     ul.innerHTML = '';
     (fileStore[f.id] || []).forEach((file, i) => ul.append(h('li', {}, h('span', { class: 'fname', text: file.name }), h('span', { class: 'fsize', text: size(file.size) }), h('button', { type: 'button', class: 'row-del', 'aria-label': `移除 ${file.name}`, title: '移除', text: '×', onclick: () => { fileStore[f.id].splice(i, 1); drawFiles(f); refresh(); schedule(); } }))));
   }
+  /* 用法明細：依來源欄位勾選的藥，每種藥一列；填過的值存在 drugStore，取消再勾回來還在 */
+  const DRUG_KEYS = ['name', 'dose', 'route', 'freq', 'start', 'days'];
+  function drugLabels(f, V) {
+    const out = [];
+    f.from.forEach(src => (V[src] || []).forEach(o => {
+      if (f.skip.includes(o)) return;
+      const label = o === otherOf(FIELDS.get(src).f) ? `其他：${V[`${src}_other`] || '（請在上面說明）'}` : o.replace(/（.*）$/, '');
+      if (!out.includes(label)) out.push(label);
+    }));
+    return out;
+  }
+  function syncDrugs(f, V) {
+    const list = byId(`dl-${f.id}`), labels = drugLabels(f, V), key = JSON.stringify(labels);
+    if (list.dataset.labels === key) return;
+    list.dataset.labels = key;
+    list.textContent = '';
+    if (!labels.length) { list.append(h('p', { class: 'drug-empty', text: '在上面勾選後，這裡會列出每一種藥的欄位。' })); return; }
+    labels.forEach(label => {
+      const s = drugStore[f.id][label] || {};
+      const inp = (k, title, extra) => h('input', Object.assign({ class: 'input', type: 'text', 'data-k': k, value: s[k] || '', 'aria-label': `${label}：${title}`, autocomplete: 'off' }, extra));
+      const sel = (k, title, opts) => { const x = h('select', { class: 'input', 'data-k': k, 'aria-label': `${label}：${title}` }, h('option', { value: '', text: '—' }), opts.map(o => h('option', { value: o, text: o }))); x.value = s[k] || ''; return x; };
+      const unit = (i, u) => h('div', { class: 'unit-wrap' }, i, h('span', { class: 'unit', text: u }));
+      const cell = (title, input) => h('label', { class: 'drug-cell' }, h('span', { class: 'drug-k', text: title }), input);
+      const cells = [];
+      if (f.named) cells.push(cell('藥名', inp('name', '藥名', { placeholder: '例：prednisolone' })));
+      cells.push(cell('劑量', unit(inp('dose', '劑量', { inputmode: 'decimal' }), 'mg/kg')));
+      cells.push(cell('途徑', sel('route', '途徑', ROUTES)));
+      cells.push(cell('頻率', sel('freq', '頻率', FREQS)));
+      cells.push(cell('第幾天開始', inp('start', '第幾天開始', { inputmode: 'numeric', placeholder: '0' })));
+      cells.push(cell('共幾天', unit(inp('days', '共幾天', { inputmode: 'numeric' }), '天')));
+      list.append(h('div', { class: 'drug-row', 'data-drug': label }, h('p', { class: 'drug-name', text: label }), h('div', { class: `drug-cells${f.named ? ' named' : ''}` }, cells)));
+    });
+  }
+  function drugRows(f) {
+    const list = byId(`dl-${f.id}`);
+    const labels = list && list.dataset.labels ? JSON.parse(list.dataset.labels) : [];
+    return labels.map(l => Object.assign({ drug: l }, drugStore[f.id][l] || {})).filter(r => DRUG_KEYS.some(k => r[k]));
+  }
+  const drugText = rows => rows.map(r => `${r.drug}：` + [r.name, r.dose && `${r.dose} mg/kg`, r.route, r.freq, r.start && `第 ${r.start} 天起`, r.days && `${r.days} 天`].filter(Boolean).join('，')).join('; ');
+
   function toBase64(file) {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
@@ -646,6 +714,7 @@ function dictRows() {
       case 'checks': return $$(`input[name="${f.id}"]:checked`, w).map(i => i.value);
       case 'consent': return byId(f.id).checked;
       case 'files': return (fileStore[f.id] || []).slice();
+      case 'drugs': return drugRows(f);
       default: { const i = byId(f.id); const v = i ? i.value.trim() : ''; return f.upper ? v.toUpperCase() : v; }
     }
   }
@@ -664,6 +733,14 @@ function dictRows() {
       case 'checks': $$(`input[name="${f.id}"]`, w).forEach(i => { i.checked = Array.isArray(v) && v.includes(i.value); }); break;
       case 'consent': byId(f.id).checked = !!v; break;
       case 'files': fileStore[f.id] = []; drawFiles(f); break;
+      case 'drugs': {
+        drugStore[f.id] = {};
+        (Array.isArray(v) ? v : []).forEach(r => { if (r && r.drug) drugStore[f.id][r.drug] = Object.assign({}, r); });
+        const list = byId(`dl-${f.id}`);
+        list.dataset.labels = '';
+        list.textContent = '';
+        break;
+      }
       default: { const i = byId(f.id); if (i) i.value = v == null ? '' : v; }
     }
   }
@@ -709,6 +786,13 @@ function dictRows() {
       return '請填寫這一欄';
     }
     if (f.check && codeCache.get(v) === 'bad') return errText('ACCESS_DENIED');
+    if (f.type === 'drugs') {
+      for (const r of v) {
+        if (r.dose && !(/^\d+(\.\d+)?$/.test(r.dose) && Number(r.dose) > 0 && Number(r.dose) <= 1000)) return `${r.drug}：劑量請填數字（mg/kg）`;
+        if (r.start && !/^\d{1,3}$/.test(r.start)) return `${r.drug}：第幾天開始請填整數，診斷當天是 0`;
+        if (r.days && !/^\d{1,3}$/.test(r.days)) return `${r.drug}：天數請填整數`;
+      }
+    }
     if (f.type === 'number') {
       if (!/^-?\d+(\.\d+)?$/.test(v)) return '請填數字';
       const n = Number(v);
@@ -806,6 +890,7 @@ function dictRows() {
       const w = WRAP.get(f.id), vis = visible(f.id, V);
       w.hidden = !vis;
       if (f.other) $('.other', w).hidden = !(vis && hasOther(f, V[f.id]));
+      if (f.type === 'drugs' && vis) syncDrugs(f, V);
     });
     let total = 0, done = 0;
     const missing = [];
@@ -932,6 +1017,7 @@ function dictRows() {
       if (f.meta) return;
       const vis = visible(f.id, V);
       if (f.type === 'files') { p.case[`${f.id}_n`] = vis ? V[f.id].length : 0; return; }
+      if (f.type === 'drugs') { p.case[f.id] = vis ? drugText(V[f.id]) : ''; return; }
       const target = (f.group || sec.group) === 'contributor' ? p.contributor : p.case;
       let val = vis ? V[f.id] : '';
       if (Array.isArray(val)) val = val.join('; ');
