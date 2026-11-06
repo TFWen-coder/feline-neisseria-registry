@@ -325,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.8',
+  FORM_VERSION: '2.9',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -335,15 +335,18 @@ const CITIES = ['基隆市', '臺北市', '新北市', '桃園市', '新竹市',
 const YNU = ['有', '無', '不明'];
 const ABX = ['Amoxicillin-clavulanate', 'Ampicillin 或 ampicillin-sulbactam', 'Cefazolin', 'Cefovecin', '第三代頭孢菌素', 'Enrofloxacin', 'Marbofloxacin', 'Pradofloxacin', 'Doxycycline', 'TMP-SMX', 'Metronidazole', 'Clindamycin', 'Gentamicin 或 amikacin', '其他'];
 const EUTH = '安樂死';
+const NO_PROC = '沒有處置（死後剖檢才確診）';
 const SURGERY_OPT = '手術（心包切開、切除或開窗）';
 const SURGERY = { f: 't_main', has: SURGERY_OPT };
+const NO_SURGERY = { all: [{ f: 't_main', nothas: NO_PROC }, { f: 't_main', lacks: SURGERY_OPT }] };
 const ABX_WAITED = '等培養結果才開始用';
 const NO_ABX = '沒有用抗生素';
 const ABX_GIVEN = { f: 't_abx_first', nothas: NO_ABX };
 const ROUTES = ['PO', 'SC', 'IV', 'IM'];
 const FREQS = ['SID', 'BID', 'TID', '長效或單次', '其他'];
 const CYTO_DONE = { f: 'f_cyto', in: ['化膿性滲出液', '其他發炎性滲出液', '其他'] };
-const DIED = { any: [{ f: 'o_last_status', eq: '死亡（含安樂死）' }, { f: 'o_discharge', in: ['院內死亡', '院內安樂死'] }, { f: 't_main', has: EUTH }] };
+const DIED = { any: [{ f: 'o_last_status', eq: '死亡（含安樂死）' }, { f: 'o_discharge', in: ['院內死亡', '院內安樂死'] }, { f: 't_main', has: EUTH }, { f: 't_main', has: NO_PROC }] };
+const FU_ECHO_DONE = ['積液消失', '仍有少量積液，不需處理', '仍有積液，需要處理'];
 const SURVIVAL = ['診斷當天', '1–3 天', '4–7 天', '8–30 天', '1–6 個月', '超過 6 個月'];
 const survivalDays = V => {
   const ok = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '');
@@ -352,6 +355,11 @@ const survivalDays = V => {
   return d >= 0 ? d : null;
 };
 const survivalBracket = d => d == null ? '' : d === 0 ? SURVIVAL[0] : d <= 3 ? SURVIVAL[1] : d <= 7 ? SURVIVAL[2] : d <= 30 ? SURVIVAL[3] : d <= 182 ? SURVIVAL[4] : SURVIVAL[5];
+/* 「距診斷日」的天數不能超過最後追蹤日 */
+const withinFollowUp = id => V => {
+  const d = survivalDays(V), v = V[id];
+  return d != null && /^\d+$/.test(v || '') && Number(v) > d ? `不能晚於最後追蹤日（診斷後第 ${d} 天）` : '';
+};
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
 
 const SCHEMA = [
@@ -392,10 +400,11 @@ const SCHEMA = [
     { id: 'c_attending', group: 'contributor', type: 'text', label: '主治醫師', span: 6, help: '不是你本人主治的病例才需要填。' }
   ] },
   { id: 'presentation', group: 'case', short: '就診表現', title: '就診表現與血液檢查', desc: '血液檢查不用打數字：直接上傳報告，數值由主持人統一擷取。', fields: [
-    { id: 'p_complaint', type: 'checks', label: '主訴', options: ['食慾不振或廢絕', '精神沉鬱', '呼吸急促或困難', '嘔吐', '虛脫或倒地', '體重減輕', '其他'], other: true },
+    { id: 'p_complaint', type: 'checks', label: '主訴', options: ['食慾不振或廢絕', '精神沉鬱', '呼吸急促或困難', '嘔吐', '虛脫或倒地', '體重減輕', '其他'], other: true, span: 4 },
     { id: 'p_duration', type: 'number', label: '到院前症狀持續', unit: '天', min: 0, max: 365 },
     { id: 'p_temp', type: 'number', label: '體溫', unit: '°C', min: 30, max: 43, step: 0.1 },
     { id: 'p_hr', type: 'number', label: '心跳', unit: 'bpm', min: 20, max: 350, int: true },
+    { id: 'p_rr', type: 'number', label: '呼吸', unit: '次/分', min: 4, max: 200, int: true },
     { id: 'p_exam', type: 'checks', label: '理學檢查', options: ['心音模糊', '心雜音', '心律不整', '股脈弱', '黏膜蒼白', '頸靜脈怒張', '腹部膨大或腹水', '肺音減弱', '休克', '無特殊', '其他'], exclusive: ['無特殊'], other: true },
     { id: 'u_blood', type: 'files', label: '血液檢查報告（CBC、生化、血片判讀）', accept: 'image/*,application/pdf', help: '治療前、最接近診斷日的報告；後續追蹤的報告也歡迎一起上傳。' },
     { id: 'l_bloodcx', type: 'radio', label: '血液培養', options: ['未做', '陰性', '陽性'] },
@@ -411,6 +420,7 @@ const SCHEMA = [
     { id: 'i_pleural_org', type: 'text', label: '胸水培養長出的菌', span: 6, showIf: { f: 'i_pleural_cx', eq: '陽性' } },
     { id: 'i_ascites', type: 'radio', label: '腹水', options: YNU },
     { id: 'i_abd', type: 'text', label: '腹腔其他感染灶', span: 6, placeholder: '例：肝膿瘍、腹膜炎；沒有就留空' },
+    { id: 'i_focus', type: 'checks', label: '胸腔與腹腔以外的感染灶', options: ['皮下膿瘍或蜂窩性組織炎', '頸部或下顎淋巴結腫大', '牙根膿瘍或其他口腔感染', '沒有發現', '其他'], exclusive: ['沒有發現'], other: true, help: '這些部位有培養的話，結果填在「培養結果」頁的「其他部位的培養結果」。' },
     { id: 'u_imaging', type: 'files', label: '心臟超音波、X 光或 CT 截圖', accept: 'image/*,video/*', help: '匯出成 JPG 或 MP4 上傳；DICOM 檔請先匯出。' },
     { id: 'f_appear', type: 'checks', label: '心包液外觀', options: ['膿樣或混濁', '血樣', '漿液血樣', '含絮狀物', '惡臭', '其他'], other: true },
     { id: 'f_cyto', type: 'radio', label: '心包液細胞學', options: ['化膿性滲出液', '其他發炎性滲出液', '其他', '未做'], other: true, help: '化膿性滲出液：以變性嗜中性球為主。' },
@@ -423,6 +433,7 @@ const SCHEMA = [
     { id: 'm_specimen', type: 'checks', label: '培養檢體', required: true, options: ['心包液', '心包組織', '引流液', '剖檢檢體'] },
     { id: 'm_species', type: 'select', label: '<i>Neisseria</i> 菌種', required: true, span: 3, other: true, otherValue: '其他（照報告填）', options: ['N. animaloris', 'N. zoodegmatis', 'N. canis', 'N. weaveri', 'Neisseria spp.（未鑑定到種）', 'CDC EF-4（舊稱）', '其他（照報告填）'] },
     { id: 'm_lab', type: 'text', label: '檢驗單位', required: true, span: 3 },
+    { id: 'm_anaerobic', type: 'radio', label: '有做厭氧培養嗎？', options: ['有', '沒有，只做需氧培養', '不知道'], help: '報告沒寫就選「不知道」。判斷「只有 Neisseria」時會用到。' },
     { id: 'm_mixed', type: 'radio', label: '菌相', required: true, options: ['只有 Neisseria', '混合菌'], span: 3 },
     { id: 'm_ast', type: 'radio', label: '藥敏試驗', options: ['有做', '未做'], span: 3 },
     { id: 'm_co_orgs', type: 'text', label: '同時長出的其他菌', span: 6, placeholder: '照報告原文，可以填多個', showIf: { f: 'm_mixed', eq: '混合菌' } },
@@ -431,12 +442,16 @@ const SCHEMA = [
     { id: 'm_other_cx', type: 'text', label: '其他部位的培養結果', span: 6, placeholder: '例：腹水陰性；肺部 FNA 長出 N. animaloris' }
   ] },
   { id: 'outcome', group: 'case', short: '治療與結局', title: '治療與結局', fields: [
-    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔穿刺', '胸腔引流管（胸管）', SURGERY_OPT, EUTH], help: '可複選。抗生素和其他用藥在下面。' },
+    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔穿刺', '胸腔引流管（胸管）', SURGERY_OPT, EUTH, NO_PROC], exclusive: [NO_PROC], help: '可複選，整個病程做過的都勾。抗生素和其他用藥在下面。' },
     { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
+    { id: 't_drain_day', type: 'number', label: '引流管放置距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: { f: 't_main', has: '心包引流管' }, help: '診斷當天放置填 0。', validate: withinFollowUp('t_drain_day') },
     { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
     { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸心包切開', '開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
-    { id: 't_surgery_day', type: 'number', label: '手術距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: SURGERY, help: '診斷當天手術填 0。' },
+    { id: 't_surgery_day', type: 'number', label: '手術距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: SURGERY, help: '診斷當天手術填 0。', validate: withinFollowUp('t_surgery_day') },
     { id: 't_surgery_why', type: 'radio', label: '手術時機', options: ['一開始就安排手術', '穿刺或引流效果不佳', '復發後才手術'], span: 4, showIf: SURGERY },
+    { id: 't_surgery_find', type: 'checks', label: '手術所見', options: ['心包明顯增厚', '大量纖維素、膿塊或分隔', '心外膜也有發炎或纖維化', '找到異物', '無特殊', '其他'], exclusive: ['無特殊'], other: true, showIf: SURGERY, help: '照手術紀錄填。心包病理報告請在最後「剖檢或病理」上傳。' },
+    { id: 't_surgery_comp', type: 'checks', label: '手術併發症', required: true, options: ['無', '術中心律不整，需要處理', '出血，需要輸血', '術後氣胸或胸管問題', '傷口併發症', '術中或術後 48 小時內死亡', '其他', '不明'], exclusive: ['無', '不明'], other: true, showIf: SURGERY },
+    { id: 't_nosurg_why', type: 'radio', label: '沒有做手術的主要原因', required: true, options: ['內科治療反應好，不需要手術', '有建議手術，飼主因經濟考量拒絕', '有建議手術，飼主因其他原因拒絕', '病況太差，無法麻醉', '本院無法執行，也沒有轉診', '還沒考慮手術就已死亡或安樂死', '當時沒有考慮手術', '病歷沒記載', '其他'], other: true, showIf: NO_SURGERY, help: '只選最主要的一個。用來區分「內科治療有效」和「需要手術但沒做」。' },
     { id: 't_abx_first', type: 'checks', label: '一開始用的抗生素（培養結果出來前）', required: true, options: [...ABX, ABX_WAITED, NO_ABX], exclusive: [ABX_WAITED, NO_ABX], other: true, help: '用來判斷經驗性用藥是否涵蓋分離到的菌。' },
     { id: 't_abx_change', type: 'radio', label: '看到藥敏結果後，有換藥或加藥嗎？', options: ['有', '沒有', '沒有藥敏結果'], showIf: ABX_GIVEN },
     { id: 't_abx_after', type: 'checks', label: '換成或加上的抗生素', options: ABX, other: true, showIf: { f: 't_abx_change', eq: '有' } },
@@ -447,11 +462,12 @@ const SCHEMA = [
     { id: 't_hosp_days', type: 'number', label: '住院天數', unit: '天', min: 0, max: 365, int: true },
     { id: 't_dental', type: 'radio', label: '治療期間或之後有做牙科處置嗎？', options: ['沒有', '洗牙', '拔牙', '不明'] },
     { id: 'o_discharge', type: 'radio', label: '住院結果', required: true, options: ['存活出院', '院內死亡', '院內安樂死', '未住院'] },
-    { id: 'o_last_date', type: 'date', label: '最後追蹤日', required: true, min: '2015-01-01', span: 2, help: '死亡病例填死亡日。', validate: V => (V.s_dx_date && V.o_last_date && V.o_last_date < V.s_dx_date) ? '不能早於診斷日' : '' },
+    { id: 'o_last_date', type: 'date', label: '最後追蹤日', required: true, min: '2015-01-01', span: 2, help: '死亡病例填死亡日。還活著的填最後一次確認的日期，回診或電話都算。', validate: V => (V.s_dx_date && V.o_last_date && V.o_last_date < V.s_dx_date) ? '不能早於診斷日' : '' },
     { id: 'o_last_status', type: 'radio', label: '最後狀態', required: true, options: ['存活', '死亡（含安樂死）', '失聯'], span: 4,
       validate: V => !V.o_last_status || V.o_last_status === '死亡（含安樂死）' ? ''
         : ['院內死亡', '院內安樂死'].includes(V.o_discharge) ? '住院期間死亡的病例，最後狀態應為「死亡（含安樂死）」'
-        : (V.t_main || []).includes(EUTH) ? '處置勾了「安樂死」，最後狀態應為「死亡（含安樂死）」' : '' },
+        : (V.t_main || []).includes(EUTH) ? '處置勾了「安樂死」，最後狀態應為「死亡（含安樂死）」'
+        : (V.t_main || []).includes(NO_PROC) ? '處置勾了「死後剖檢才確診」，最後狀態應為「死亡（含安樂死）」' : '' },
     { id: 'o_survival', type: 'radio', label: '存活時間（診斷到死亡）', options: SURVIVAL, showIf: DIED, help: '安樂死也算。填好診斷日和最後追蹤日（死亡日）會自動選好。',
       auto: V => survivalBracket(survivalDays(V)),
       validate: V => { const d = survivalDays(V), b = survivalBracket(d); return b && V.o_survival && V.o_survival !== b ? `診斷日到死亡日是 ${d} 天，應選「${b}」` : ''; } },
@@ -461,9 +477,11 @@ const SCHEMA = [
         : ((V.t_main || []).includes(EUTH) && V.o_death_mode && !V.o_death_mode.startsWith('安樂死') && V.o_death_mode !== '不明') ? '處置勾了「安樂死」，請選安樂死的原因' : '' },
     { id: 'o_death_related', type: 'radio', label: '死亡和這次的病有關嗎？', options: ['有關', '無關', '不明'], showIf: DIED },
     { id: 'o_death_cause', type: 'text', label: '死亡或安樂死的原因', span: 6, showIf: DIED, placeholder: '例：回診前一天在家猝死，沒有剖檢' },
-    { id: 'o_recur', type: 'radio', label: '心包積液復發', options: YNU, span: 3 },
+    { id: 'o_recur', type: 'radio', label: '心包積液復發', options: YNU, span: 3, help: '積液消失或明顯減少後，又累積到需要再穿刺、引流或手術。' },
     { id: 'o_constrict', type: 'radio', label: '縮窄性心包炎', options: YNU, span: 3 },
-    { id: 'o_recur_day', type: 'number', label: '復發距診斷日', unit: '天', min: 0, max: 5000, int: true, showIf: { f: 'o_recur', eq: '有' } },
+    { id: 'o_recur_day', type: 'number', label: '第一次復發距診斷日', unit: '天', min: 0, max: 5000, int: true, showIf: { f: 'o_recur', eq: '有' }, validate: withinFollowUp('o_recur_day') },
+    { id: 'o_fu_echo', type: 'radio', label: '出院後最後一次心臟超音波', options: [...FU_ECHO_DONE, '沒有追蹤心臟超音波'], span: 4, showIf: { f: 'o_discharge', in: ['存活出院', '未住院'] } },
+    { id: 'o_fu_echo_day', type: 'number', label: '這次超音波距診斷日', unit: '天', min: 0, max: 5000, int: true, showIf: { f: 'o_fu_echo', in: FU_ECHO_DONE }, validate: withinFollowUp('o_fu_echo_day') },
     { id: 'o_necropsy', type: 'radio', label: '剖檢或病理', options: ['有', '無'] },
     { id: 'u_path', type: 'files', label: '病理報告', accept: 'image/*,application/pdf', showIf: { f: 'o_necropsy', eq: '有' } },
     { id: 'u_link', type: 'text', label: '雲端連結（檔案太大時用）', span: 6, placeholder: 'Google 雲端硬碟或 Dropbox 分享連結' },
@@ -508,7 +526,7 @@ function dictRows() {
   const DRAFT_KEY = 'np-crf-draft-v2';
   const CONTRIB_KEY = 'np-crf-contributor-v2';
   const LAST = SCHEMA.length - 1;
-  const SUGGEST = ['u_blood', 'p_temp', 'i_tamponade', 'i_pleural', 'f_cyto', 'u_fluid', 'm_ast', 't_surgery_why', 't_abx_change', 't_abx_detail', 't_abx_total', 't_hosp_days', 'o_recur'];
+  const SUGGEST = ['u_blood', 'p_temp', 'p_rr', 'i_tamponade', 'i_pleural', 'i_focus', 'f_cyto', 'u_fluid', 'm_anaerobic', 'm_ast', 't_surgery_why', 't_surgery_find', 't_abx_change', 't_abx_detail', 't_abx_total', 't_hosp_days', 'o_recur', 'o_fu_echo'];
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const byId = id => document.getElementById(id);
