@@ -274,7 +274,7 @@ dialog::backdrop{background:rgba(20,16,32,.45)}
   </figure>
   <dl class="facts">
     <div><dt>收案條件</dt><dd>貓，心包液或心包組織培養出 <i>Neisseria</i> 屬，首次採樣在 2015 年以後</dd></div>
-    <div><dt>不收集</dt><dd>飼主姓名、電話、地址、病歷號與晶片號</dd></div>
+    <div><dt>不用填</dt><dd>飼主姓名、電話、地址、病歷號與晶片號</dd></div>
     <div><dt>收案截止</dt><dd id="fact-deadline"></dd></div>
     <div><dt>主持人</dt><dd id="fact-pi"></dd></div>
   </dl>
@@ -325,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.7',
+  FORM_VERSION: '2.8',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -405,13 +405,13 @@ const SCHEMA = [
     { id: 'i_tamponade', type: 'radio', label: '心包填塞（右心房或右心室舒張期塌陷）', options: ['有', '無', '不確定'] },
     { id: 'i_echo_find', type: 'checks', label: '心臟超音波其他發現', options: ['心包增厚', '心包內纖維素或分隔', '左心室肥厚', '左心房擴大', '疑似心肌炎', '疑似心內膜炎（瓣膜贅生物）', '無其他異常', '其他'], exclusive: ['無其他異常'], other: true },
     { id: 'i_thorax', type: 'checks', label: '胸腔 X 光或 CT', options: ['心影擴大或球形心', '肺浸潤', '肺結節或腫塊', '縱膈異常', '無異常', '沒有拍'], exclusive: ['無異常', '沒有拍'] },
-    { id: 'i_pleural', type: 'radio', label: '胸水', options: YNU },
+    { id: 'i_pleural', type: 'radio', label: '有沒有胸水', required: true, options: YNU },
     { id: 'i_pleural_type', type: 'radio', label: '胸水性質', options: ['化膿性（膿胸）', '非化膿性', '沒有採樣'], showIf: { f: 'i_pleural', eq: '有' } },
     { id: 'i_pleural_cx', type: 'radio', label: '胸水培養', options: ['未做', '陰性', '陽性'], showIf: { f: 'i_pleural', eq: '有' } },
     { id: 'i_pleural_org', type: 'text', label: '胸水培養長出的菌', span: 6, showIf: { f: 'i_pleural_cx', eq: '陽性' } },
     { id: 'i_ascites', type: 'radio', label: '腹水', options: YNU },
     { id: 'i_abd', type: 'text', label: '腹腔其他感染灶', span: 6, placeholder: '例：肝膿瘍、腹膜炎；沒有就留空' },
-    { id: 'u_imaging', type: 'files', label: '心臟超音波、X 光或 CT 截圖', accept: 'image/*,video/*', help: '匯出成 JPG 或 MP4，並遮蓋畫面上的飼主資料。DICOM 檔頭常有飼主資料，請不要直接上傳。' },
+    { id: 'u_imaging', type: 'files', label: '心臟超音波、X 光或 CT 截圖', accept: 'image/*,video/*', help: '匯出成 JPG 或 MP4 上傳；DICOM 檔請先匯出。' },
     { id: 'f_appear', type: 'checks', label: '心包液外觀', options: ['膿樣或混濁', '血樣', '漿液血樣', '含絮狀物', '惡臭', '其他'], other: true },
     { id: 'f_cyto', type: 'radio', label: '心包液細胞學', options: ['化膿性滲出液', '其他發炎性滲出液', '其他', '未做'], other: true, help: '化膿性滲出液：以變性嗜中性球為主。' },
     { id: 'f_icb', type: 'radio', label: '細胞內細菌', options: ['有', '無', '未評估'], showIf: CYTO_DONE },
@@ -419,7 +419,7 @@ const SCHEMA = [
     { id: 'u_fluid', type: 'files', label: '心包液分析報告或細胞學照片', accept: 'image/*,application/pdf' }
   ] },
   { id: 'micro', group: 'case', short: '培養結果', title: '培養結果', desc: '先上傳培養報告，再照報告填。藥敏結果由主持人從報告擷取，不用打。', fields: [
-    { id: 'u_culture', type: 'files', label: '培養與藥敏報告', required: true, accept: 'image/*,application/pdf', help: '上傳前請遮蓋飼主姓名、電話與病歷號。' },
+    { id: 'u_culture', type: 'files', label: '培養與藥敏報告', required: true, accept: 'image/*,application/pdf' },
     { id: 'm_specimen', type: 'checks', label: '培養檢體', required: true, options: ['心包液', '心包組織', '引流液', '剖檢檢體'] },
     { id: 'm_species', type: 'select', label: '<i>Neisseria</i> 菌種', required: true, span: 3, other: true, otherValue: '其他（照報告填）', options: ['N. animaloris', 'N. zoodegmatis', 'N. canis', 'N. weaveri', 'Neisseria spp.（未鑑定到種）', 'CDC EF-4（舊稱）', '其他（照報告填）'] },
     { id: 'm_lab', type: 'text', label: '檢驗單位', required: true, span: 3 },
@@ -431,7 +431,7 @@ const SCHEMA = [
     { id: 'm_other_cx', type: 'text', label: '其他部位的培養結果', span: 6, placeholder: '例：腹水陰性；肺部 FNA 長出 N. animaloris' }
   ] },
   { id: 'outcome', group: 'case', short: '治療與結局', title: '治療與結局', fields: [
-    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔引流管（胸管）', SURGERY_OPT, EUTH], help: '可複選。抗生素和其他用藥在下面。' },
+    { id: 't_main', type: 'checks', label: '做了哪些處置', required: true, options: ['心包穿刺', '心包引流管', '心包灌洗', '胸腔穿刺', '胸腔引流管（胸管）', SURGERY_OPT, EUTH], help: '可複選。抗生素和其他用藥在下面。' },
     { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
     { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
     { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸心包切開', '開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
