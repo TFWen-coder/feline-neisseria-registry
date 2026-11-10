@@ -325,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '3.0',
+  FORM_VERSION: '3.1',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -444,7 +444,7 @@ const SCHEMA = [
     { id: 't_pc_n', type: 'number', label: '心包穿刺次數', unit: '次', min: 1, max: 50, int: true, showIf: { f: 't_main', has: '心包穿刺' } },
     { id: 't_drain_day', type: 'number', label: '引流管放置距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: { f: 't_main', has: '心包引流管' }, help: '診斷當天放置填 0。', validate: withinFollowUp('t_drain_day') },
     { id: 't_drain_days', type: 'number', label: '心包引流管留置', unit: '天', min: 0, max: 60, step: 0.5, showIf: { f: 't_main', has: '心包引流管' } },
-    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸心包切開', '開胸次全心包切除', '胸腔鏡心包開窗', '其他'], other: true, showIf: SURGERY },
+    { id: 't_surgery', type: 'radio', label: '手術方式', options: ['開胸心包切開', '開胸次全心包切除', '胸腔鏡心包開窗或部分切除', '其他'], other: true, showIf: SURGERY },
     { id: 't_surgery_day', type: 'number', label: '手術距診斷日', unit: '天', required: true, min: 0, max: 365, int: true, showIf: SURGERY, help: '診斷當天手術填 0。', validate: withinFollowUp('t_surgery_day') },
     { id: 't_surgery_why', type: 'radio', label: '手術時機', options: ['一開始就安排手術', '穿刺或引流效果不佳', '復發後才手術'], span: 4, showIf: SURGERY },
     { id: 't_surgery_find', type: 'checks', label: '手術所見', options: ['心包明顯增厚', '大量纖維素、膿塊或分隔', '心外膜也有發炎或纖維化', '找到異物', '無特殊', '其他'], exclusive: ['無特殊'], other: true, showIf: SURGERY, help: '照手術紀錄填。心包病理報告請在最後「剖檢或病理」上傳。' },
