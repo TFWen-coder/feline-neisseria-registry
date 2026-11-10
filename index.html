@@ -325,7 +325,7 @@ const CONFIG = {
   PI: 'Tsung Fei Wen（TF Wen）',
   HOSPITAL: 'Mercy Animal Hospital（高雄）',
   DEADLINE: '2027-02-28',
-  FORM_VERSION: '2.9',
+  FORM_VERSION: '3.0',
   MAX_FILE_MB: 10, // 只在後端還不支援分段上傳時使用；支援時不限檔案大小
   CHUNK_MB: 4
 };
@@ -428,7 +428,7 @@ const SCHEMA = [
     { id: 'f_morph', type: 'checks', label: '細菌形態', options: ['球菌', '雙球菌', '球桿菌', '桿菌', '混合', '未見細菌'], exclusive: ['未見細菌'], showIf: CYTO_DONE },
     { id: 'u_fluid', type: 'files', label: '心包液分析報告或細胞學照片', accept: 'image/*,application/pdf' }
   ] },
-  { id: 'micro', group: 'case', short: '培養結果', title: '培養結果', desc: '先上傳培養報告，再照報告填。藥敏結果由主持人從報告擷取，不用打。', fields: [
+  { id: 'micro', group: 'case', short: '培養結果', title: '培養結果', desc: '先上傳培養報告，再照報告填。藥敏結果、菌種鑑定方法和菌株保存，由主持人看報告或向檢驗單位確認，不用填。', fields: [
     { id: 'u_culture', type: 'files', label: '培養與藥敏報告', required: true, accept: 'image/*,application/pdf' },
     { id: 'm_specimen', type: 'checks', label: '培養檢體', required: true, options: ['心包液', '心包組織', '引流液', '剖檢檢體'] },
     { id: 'm_species', type: 'select', label: '<i>Neisseria</i> 菌種', required: true, span: 3, other: true, otherValue: '其他（照報告填）', options: ['N. animaloris', 'N. zoodegmatis', 'N. canis', 'N. weaveri', 'Neisseria spp.（未鑑定到種）', 'CDC EF-4（舊稱）', '其他（照報告填）'] },
@@ -437,8 +437,6 @@ const SCHEMA = [
     { id: 'm_mixed', type: 'radio', label: '菌相', required: true, options: ['只有 Neisseria', '混合菌'], span: 3 },
     { id: 'm_ast', type: 'radio', label: '藥敏試驗', options: ['有做', '未做'], span: 3 },
     { id: 'm_co_orgs', type: 'text', label: '同時長出的其他菌', span: 6, placeholder: '照報告原文，可以填多個', showIf: { f: 'm_mixed', eq: '混合菌' } },
-    { id: 'm_id_method', type: 'select', label: '菌種鑑定方法', span: 3, other: true, options: ['報告沒寫或不知道', '傳統生化', 'VITEK 2', 'MALDI-TOF', '16S rRNA 定序', '其他'] },
-    { id: 'm_isolate', type: 'radio', label: '菌株還保存在檢驗單位嗎？', span: 3, options: ['是', '否', '不知道'] },
     { id: 'm_other_cx', type: 'text', label: '其他部位的培養結果', span: 6, placeholder: '例：腹水陰性；肺部 FNA 長出 N. animaloris' }
   ] },
   { id: 'outcome', group: 'case', short: '治療與結局', title: '治療與結局', fields: [
